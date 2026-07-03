@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(python3 *)",
+      "Bash(mv *)",
+      "Bash(mkdir *)",
+      "Bash(head *)",
+      "Bash(wc *)",
+      "Bash(jq *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/1_agentic_config/scripts/timeline-guard.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+# Knowledge-base CONTENT — must NEVER be committed into the framework repo.
+# The content-guard pre-commit hook (active in gateway/framework clones only)
+# aborts a commit if any staged path matches a pattern below.
+# SINGLE SOURCE OF TRUTH: referenced by the hook AND the git-ops spec — never
+# re-list these patterns in prose (avoids the spec<->code drift lesson).
+# Syntax: bash [[ == ]] globs ('*' matches across '/'); '.gitkeep' is always exempt.
+2_using_timeline/*
+3_generates_wiki/sources/*
+3_generates_wiki/concepts/*
+3_generates_wiki/entities/*
+3_generates_wiki/synthesis/*
+1_agentic_config/logs/2*-*.md

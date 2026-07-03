@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# pre-commit: CONTENT-GUARD for the framework repo (active in gateway/framework clones).
+# Aborts a commit if any staged file is knowledge-base CONTENT, keeping the shared
+# framework repo (agentic-KB_OMD) content-free. Canonical pattern list (single source
+# of truth) lives in 1_agentic_config/scripts/content-paths.
+#
+# Activation is controlled by `core.hooksPath` (set by setup.sh, GATEWAY role only) —
+# a content VAULT never points core.hooksPath here, so it can commit content freely.
+
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+MANIFEST="$ROOT/1_agentic_config/scripts/content-paths"
+[ -f "$MANIFEST" ] || exit 0   # no manifest -> nothing to guard
+
+mapfile -t PATTERNS < <(grep -vE '^[[:space:]]*(#|$)' "$MANIFEST")
+
+blocked=()
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  [ "$(basename "$f")" = ".gitkeep" ] && continue
+  for pat in "${PATTERNS[@]}"; do
+    # unquoted $pat => bash glob match; '*' matches across '/' inside [[ == ]]
+    if [[ "$f" == $pat ]]; then blocked+=("$f"); break; fi
+  done
+done < <(git diff --cached --name-only --diff-filter=ACMR)
+
+if [ ${#blocked[@]} -gt 0 ]; then
+  {
+    echo "‼ BLOCKED: attempt to commit knowledge-base CONTENT into the framework repo:"
+    printf '    %s\n' "${blocked[@]}"
+    echo ""
+    echo "This clone is a framework/gateway checkout and must stay content-free."
+    echo "Content belongs in a knowledge-base vault, committed and pushed to ITS OWN origin."
+    echo "Break-glass / why: 1_agentic_config/admin/RUNBOOK.git-ops.md"
+  } >&2
+  exit 1
+fi
+exit 0

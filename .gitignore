@@ -1,18 +1,30 @@
-# This .gitignore is appropriate for repositories deployed to GitHub Pages and using
-# a Gemfile as specified at https://github.com/github/pages-gem#conventional
+# =============================================================================
+# Template-repo hygiene: what must NOT travel when this vault is cloned as a
+# new knowledge base. The committed baseline (schema, specs, scripts,
+# .claude/settings.json with the portable guard hook) travels; everything
+# below is machine-/vault-specific and re-accretes or is re-created per clone.
+# =============================================================================
 
-# Basic Jekyll gitignores (synchronize to Jekyll.gitignore)
-_site/
-.sass-cache/
-.jekyll-cache/
-.jekyll-metadata
+# --- Personal Claude Code permission grants (project-scoped; re-accretes per clone) ---
+# "Don't ask again" writes here. Kept out of the repo so each clone starts clean
+# and builds its own local allow-list. The shared baseline lives in .claude/settings.json.
+.claude/settings.local.json
 
-# Additional Ruby/bundler ignore for when you run: bundle install
-/vendor
+# --- SECRETS: Obsidian Local REST API key lives in the plugin's data.json ---
+# Never ship one vault's API key to another (each vault gets its own — see
+# checklist.new-wiki-project §3c). This is the most important line here.
+.obsidian/plugins/*/data.json
 
-# Specific ignore for GitHub Pages
-# GitHub Pages will always use its own deployed version of pages-gem
-# This means GitHub Pages will NOT use your Gemfile.lock and therefore it is
-# counterproductive to check this file into the repository.
-# Details at https://github.com/github/pages-gem/issues/768
-Gemfile.lock
+# --- Obsidian per-user UI state (churns constantly, machine-specific) ---
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# --- Obsidian trash & OS cruft ---
+.trash/
+.DS_Store
+Thumbs.db
+
+# --- Optional: uncomment to reinstall plugins per-vault (checklist §3a) instead ---
+# of shipping their code in the template. Left tracked by default so a fresh
+# clone is "para-drop and go" with the MCP plugin already present.
+# .obsidian/plugins/
