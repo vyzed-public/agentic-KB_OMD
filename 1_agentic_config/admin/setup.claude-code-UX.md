@@ -7,6 +7,8 @@ description: Spec for setting up a rich statusline, done-signal + "needs-you" de
 
 # Claude Code UX Setup
 
+> **Related:** [[guide.handoff-management]] — a companion primer on preserving working context across compaction and sessions. This doc tunes the *environment*; that one tunes the *workflow*.
+
 This is an instruction file for an LLM agent (e.g. Claude Code). Its job is to set up these UX improvements in `~/.claude/`:
 
 1. **Rich statusline** — shows a processing state label, `username:dirname`, model name, 5-hour session rate limit usage, and context window usage in the Claude Code status bar.
