@@ -16,8 +16,8 @@ _(none yet)_
 _(none yet)_
 
 ## Meta
-- [[checklist.new-wiki-project]] — bootstrap checklist (fork → clone → setup)
-- [[spec.git-ops]] — the fork/upstream multi-vault git model
+- [[checklist.new-wiki-project]] — bootstrap checklist (clone → push → setup)
+- [[spec.git-ops]] — the two-remote (clone/upstream) multi-vault git model
 - [[spec.testing]] — how to run the local test harnesses
 - [[RUNBOOK.git-ops]] — break-glass recovery
 - [[spec.directory-structure]] — annotated directory tree

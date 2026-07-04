@@ -4,24 +4,77 @@ Follow this in order for a deterministic setup. Steps marked **(one-time)** only
 
 ---
 
-## 0. Distribution Model — Template Repo (read first)
+## 0. Distribution Model — Clone & Keep Pulling (read first)
 
-This framework is a **template repository**: one repo holds the schema, specs, scripts, and config; each knowledge base is an independent clone of it with its own remote. There are two ways to stand up a vault:
+One framework repo (`agentic-KB_OMD`) holds the schema, specs, scripts, and config. Each knowledge base is its **own independent GitHub repo, cloned from the framework** — so it shares the framework's history (fixes pull in cleanly) while your notes back up to your own repo. Full model + recovery: [[spec.git-ops]] and [[RUNBOOK.git-ops]].
 
-**A. Fork & clone (the normal case) — "fork and keep pulling."** The framework lives once in `agentic-KB_OMD`; each KB is a *fork* you keep pulling framework fixes from, while your content is backed up to your own fork. Full model + recovery: [[spec.git-ops]] and [[RUNBOOK.git-ops]].
+> **⚠ Do NOT use GitHub's "Fork" button or "Use this template."**
+> - **Fork:** GitHub allows only **one fork of a repo per account** — you cannot fork the framework once per knowledge base.
+> - **Use this template:** creates a repo with *unrelated* git history, which makes `git pull upstream main` fail.
+> - **Cloning the framework into your own new repo** (below) avoids both: **unlimited** knowledge bases, and clean framework-fix pulls. This is the only supported path.
 
-1. **Fork** `agentic-KB_OMD` on GitHub; name the fork for your topic (e.g. `akb-omd_astronomy`). The framework repo already ships empty (content dirs hold only `.gitkeep`), so there's nothing to strip.
-2. **Clone** your fork locally: `git clone <your-fork-url>`. The local directory name is irrelevant to git (`origin` points at your fork; the guard hook resolves via `$CLAUDE_PROJECT_DIR`), so rename the folder freely.
-3. **Run setup once:** `./setup.sh --role vault --upstream <agentic-KB_OMD-url>` — adds `upstream` (fetch-only) so you can pull framework fixes but never push content into the shared framework.
-4. Do the **per-vault** steps only: §3 (MCP plugin/port/key) and §4 (daily notes). Then §6–§9.
-5. **Everyday:** `git push origin main` backs up your content to your fork; `git pull upstream main` (or GitHub's "Sync fork" button) grabs a framework fix when one ships — your content survives the pull.
+### A. Stand up a new knowledge base — just execute, top to bottom
+
+Pick two values, then run each block in order. Nothing to decide.
+
+- `<TOPIC>` — your KB's subject, e.g. `astronomy`
+- `<OWNER>` — your GitHub username or org, e.g. `vyzed-public`
+
+**A1 · Make an empty GitHub repo.** Name it `akb-omd_<TOPIC>`. The repo must have **zero commits**, so **do not** check "Add a README," ".gitignore," or "license" — any of those creates an initial commit that collides with the framework history you push in A2. A **description**, **topics**, and the **public/private** choice are all fine — they're repo metadata, not commits.
+
+> **Expected, not an error:** an empty repo shows GitHub's **"Quick setup"** page instead of the normal code view — **there is no green "Code"/clone button yet, and that's correct** (nothing to clone until you push). Grab the repo URL from the HTTPS box on that page. Ignore GitHub's "We recommend every repository include a README, LICENSE, and .gitignore" nudge — the framework history you push in A2 already brings its own. The normal repo view returns right after A2's `git push`.
+
+**A2 · Clone the framework into it and publish** — paste as-is, with `<TOPIC>` / `<OWNER>` substituted:
+
+```bash
+git clone https://github.com/vyzed-public/agentic-KB_OMD.git akb-omd_<TOPIC>
+cd akb-omd_<TOPIC>
+git remote set-url origin https://github.com/<OWNER>/akb-omd_<TOPIC>.git
+git push -u origin main
+```
+
+**A3 · Wire the update link** — adds `upstream` = the framework, **fetch-only** (so your content can never be pushed into the shared framework):
+
+```bash
+./setup.sh --role vault --upstream https://github.com/vyzed-public/agentic-KB_OMD.git
+```
+
+**A4 · Confirm the wiring.** Run:
+
+```bash
+git remote -v
+```
+
+You should see exactly these four lines (with your `<OWNER>`/`<TOPIC>`):
+
+```
+origin    https://github.com/<OWNER>/akb-omd_<TOPIC>.git (fetch)
+origin    https://github.com/<OWNER>/akb-omd_<TOPIC>.git (push)
+upstream  https://github.com/vyzed-public/agentic-KB_OMD.git (fetch)
+upstream  DISABLED (push)
+```
+
+`origin` = **your** repo, `upstream` = **the framework**, and `upstream`'s **push is DISABLED**. Then open your repo's GitHub page — it should now show the framework files (not the empty quick-setup page).
+
+> **⚠ Check the repo name matches character-for-character.** A one-letter difference (e.g. `AI-lightcone` vs `AI-light-cone`) points `origin` at a *different* repo and silently splits your work across two — and `git push` won't warn you if that other name also happens to exist. If the name is wrong, fix it: `git remote set-url origin <correct-url>` then `git push -u origin main`, and delete the stray empty repo on GitHub.
+
+**A5 · Finish the vault.** Then **§2** (open the cloned folder as an Obsidian vault), **§3** (Obsidian MCP — port/key/registration), **§4** (daily notes), and **§6, §8, §9**. **Skip §5 and §7** (from-scratch only) — a clone already has the guard hook and a bootstrapped wiki.
+
+**Everyday, from then on — just two commands:**
+
+| Run this | What it does |
+|---|---|
+| `git push origin main` | Backs up *your content* to *your own* repo |
+| `git pull upstream main` | Pulls a framework fix when one ships — **your content survives the merge** |
 
 **What lives where:**
-- **Framework** (schema, `1_agentic_config/`, `AGENTS.md`/`CLAUDE.md`, `.claude/settings.json` with the portable guard hook, `setup.sh`, `.githooks/`) — shared via the framework repo; you *pull* fixes from `upstream`. Framework fixes are published only from a content-free **gateway** clone (see [[spec.git-ops]]).
-- **Content** (your ingested notes + generated wiki) — committed to *your own fork's* `origin` (backup + propagation), never pushed to the shared framework. The content-guard hook + push-disabled `upstream` enforce this.
+- **Framework** (schema, `1_agentic_config/`, `AGENTS.md`/`CLAUDE.md`, `.claude/settings.json` with the portable guard hook, `setup.sh`, `.githooks/`) — shared; you *pull* fixes from `upstream`. Framework fixes are published only from a content-free **gateway** clone (see [[spec.git-ops]]).
+- **Content** (your ingested notes + generated wiki) — committed to *your own* repo's `origin` (backup + propagation), never pushed to the shared framework. The push-disabled `upstream` enforces this.
 - **Never committed** (gitignored): `.claude/settings.local.json` (personal grants), the **Local REST API key** in `.obsidian/plugins/*/data.json` (per-vault — §3c), and Obsidian per-user UI state.
 
-**B. From scratch (how the template itself was built).** §2 (copy files), §5 (create `settings.json`), and §7 (bootstrap `AGENTS.md`) describe building a vault from nothing — only needed to author a *new* template, not to stand up a KB from an existing one.
+### B. From scratch (only to author a *new* framework, not a knowledge base)
+
+§2 (copy files), §5 (create `settings.json`), and §7 (bootstrap `AGENTS.md`) describe building a vault from nothing — needed only to create a brand-new framework, not to stand up a KB from the existing one.
 
 The one-time (§1) and per-vault (§3, §4) steps apply to **both** paths.
 
@@ -46,42 +99,52 @@ Implement this setup exactly as described.
 
 ---
 
-## 2. Create the New Vault
+## 2. Open the Vault in Obsidian
 
-Create a new directory and open it as an Obsidian vault. Then copy these files from an existing vault's `1_agentic_config/` into the new vault:
+**Cloned vault (§0 path A — the normal case):** the clone already contains *everything* — the framework files, the `.obsidian/` app settings, and the MCP plugin. There is **nothing to copy or assemble.** You just point Obsidian at the folder:
 
-- `1_agentic_config/admin/mission.rescue-the-curator.md` ← **the foundational rationale — read it first**; everything else is downstream of the two-value thesis it states
-- `1_agentic_config/specs/pattern.karpathy-llm-wiki.md`
-- `1_agentic_config/admin/setup.claude-code-UX.md`
-- `1_agentic_config/admin/setup.obsidian-MCP.md`
-- `1_agentic_config/admin/checklist.new-wiki-project.md` ← this file
-- `1_agentic_config/admin/checklist.obsidian.setup.md`
+- Obsidian → the **vault switcher** (bottom-left, the current vault's name) → **Manage vaults…** → **Open folder as vault** → pick your cloned `akb-omd_<TOPIC>` directory. *(On a fresh Obsidian launch, the "Manage vaults" window offers **Open folder as vault** directly.)*
 
-Then apply the Obsidian app-level settings in [[1_agentic_config/admin/checklist.obsidian.setup]] (Wikilinks, link format, Detect all file extensions) and install the plugins it lists.
+Because the framework ships the Obsidian app settings and the plugin, they're already in place — you do **not** re-apply [[checklist.obsidian.setup]] or install anything. Skim that doc only if something looks off.
+
+> **From-scratch path only (§0 path B — authoring a _new_ framework):** there's no clone to open, so instead create an empty directory, open it as a vault, then assemble the framework by hand — copy these seed files from an existing vault's `1_agentic_config/`, and apply the app settings in [[checklist.obsidian.setup]] (Wikilinks, link format, Detect all file extensions) + install the plugins it lists:
+> - `1_agentic_config/admin/mission.rescue-the-curator.md` ← the foundational rationale — read it first
+> - `1_agentic_config/specs/pattern.karpathy-llm-wiki.md`
+> - `1_agentic_config/admin/setup.claude-code-UX.md`
+> - `1_agentic_config/admin/setup.obsidian-MCP.md`
+> - `1_agentic_config/admin/checklist.new-wiki-project.md`
+> - `1_agentic_config/admin/checklist.obsidian.setup.md`
 
 ---
 
 ## 3. Obsidian MCP Setup (per vault)
 
-Each vault needs its own plugin instance, port, and MCP registration. See [[setup.obsidian-MCP]] for full details; the short version:
+> **📦 Heads-up — the plugin ships with the clone. This is intentional, not a mistake.**
+> The framework repo deliberately tracks the **"Local REST API with MCP"** plugin code in `.obsidian/plugins/obsidian-local-rest-api/`, so a vault you cloned per §0 **already has the plugin installed and enabled** the first time you open it. That's the "para-drop and go" design. **Do not be surprised to see it already there, and do not reinstall it.**
+>
+> What does **not** ship (it's gitignored) is the plugin's `data.json` — which holds this vault's **port and API key**. So those two, plus the one-time MCP registration, are the *only* genuinely per-vault steps. That's exactly what a–e below cover.
 
-**a. Install and enable the plugin**
+See [[setup.obsidian-MCP]] for full details; the short version:
 
-Obsidian → Settings → Community Plugins → Browse → **"Local REST API with MCP"** → Install → Enable.
+**a. Confirm the plugin is enabled** *(cloned vault)* — or **install it** *(from-scratch vault only)*
 
-**b. Assign a unique port**
+A vault cloned per §0 already ships **"Local REST API with MCP"** enabled — just confirm: Obsidian → Settings → Community Plugins → it's listed and toggled on. Only if it's *absent* (from-scratch path): Browse → **"Local REST API with MCP"** → Install → Enable.
 
-In the plugin settings, set the port. Use the next available in sequence:
+**b. Assign a unique port** — ⚠ **required; a clone defaults to 27124 and will collide**
 
-| Vault | Port |
-|---|---|
-| First wiki | 27124 |
-| Second wiki | 27125 |
-| Third wiki | 27126 |
+Because `data.json` didn't travel, the plugin comes up on the **default port 27124** — the *same as your first vault* — so you must change it. **Don't guess, and don't try to remember which ports you've already used.** Ask the registry:
+
+```bash
+bash 1_agentic_config/scripts/next-obsidian-port.sh
+```
+
+It reads your Claude Code MCP registrations (the durable record of every vault's port) plus anything currently listening, prints the ports **in use**, and hands you the **next free one** — along with the exact `claude mcp add` line for step d. Set the plugin to that port: Obsidian → Settings → Local REST API with MCP → **Port**.
+
+*(Or simply ask Claude — "what's the next free Obsidian port?" — it runs the same check and tells you.)*
 
 **c. Get the API key**
 
-Obsidian → Settings → Local REST API with MCP → copy the **API Key**.
+On first enable, the plugin generates **this vault's own** key into `data.json` (gitignored — it never shipped, so it is *not* another vault's key). Copy it: Obsidian → Settings → Local REST API with MCP → **API Key**.
 
 **d. Register with Claude Code**
 

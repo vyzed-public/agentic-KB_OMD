@@ -41,22 +41,23 @@ Additionally, **MCP servers added mid-session don't load until Claude Code is re
 
 Repeat these steps for every vault you want available via MCP.
 
-### Step 1 — Install the plugin
+### Step 1 — Install the plugin (or confirm it's already there)
 
-In Obsidian: **Settings → Community Plugins → Browse**, search for **"Local REST API"**, install, enable.
+> **If this vault was cloned from the framework repo, the plugin already ships with it** — installed and enabled on first open (the framework tracks `.obsidian/plugins/obsidian-local-rest-api/` on purpose). Just confirm it's enabled and **skip to Step 2**. Only a from-scratch vault needs a manual install.
 
-Use **"Local REST API with MCP"** specifically (not the older plain "Local REST API"). Confirm the MCP endpoint appears in the plugin settings.
+To install manually: Obsidian → **Settings → Community Plugins → Browse**, search for **"Local REST API"**, install, enable. Use **"Local REST API with MCP"** specifically (not the older plain "Local REST API"). Confirm the MCP endpoint appears in the plugin settings.
 
 ### Step 2 — Assign a unique port
 
-In the plugin settings, set the port to something not already in use. Suggested convention:
+Every vault's plugin defaults to **27124**, so a second vault **will collide** unless you change it. **Don't track ports by hand** — ask the registry for the next free one:
 
-| Vault | Port |
-|---|---|
-| First wiki | 27124 (default) |
-| Second wiki | 27125 |
-| Third wiki | 27126 |
-| … | … |
+```bash
+bash 1_agentic_config/scripts/next-obsidian-port.sh
+```
+
+It reads your Claude Code MCP registrations (the durable record of every assigned port) plus anything currently listening, lists the ports **in use**, and prints the **next free port** and the exact `claude mcp add` line for Step 4. Set the plugin to that port in its settings. *(Or ask Claude: "what's the next free Obsidian port?")*
+
+Convention: ports climb from **27124** (first vault) — but let the helper pick, don't count in your head.
 
 ### Step 3 — Get the API key
 

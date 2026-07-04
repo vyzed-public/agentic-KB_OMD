@@ -1,14 +1,14 @@
 ---
-title: Git Ops — Multi-Vault Fork/Upstream Workflow
+title: Git Ops — Multi-Vault Clone/Upstream Workflow
 created: 2026-07-02
 updated: 2026-07-02
-description: How knowledge-base vaults relate to the shared framework repo via a fork/upstream (two-remote) model — back up to your own origin, pull framework fixes from upstream, keep the framework repo content-free. Covers roles, setup.sh, the content-guard hook, doctor.sh, and the seed-file topology.
+description: How knowledge-base vaults relate to the shared framework repo via a two-remote (origin + upstream) model — back up to your own origin, pull framework fixes from upstream, keep the framework repo content-free. Covers roles, setup.sh, the content-guard hook, doctor.sh, and the seed-file topology.
 ---
 
-# Git Ops — Multi-Vault Fork/Upstream Workflow
+# Git Ops — Multi-Vault Clone/Upstream Workflow
 
 ## The model in one paragraph
-The framework (schema, specs, scripts, config) lives once in the **framework repo** `agentic-KB_OMD`. Each knowledge base is a **fork** of it, renamed to its topic (e.g. `akb-omd_astronomy`) and cloned locally. A vault has **two remotes**: `origin` = its own repo (push everything here — your backup and how you propagate to new hosts) and `upstream` = the framework repo, **fetch-only** (pull framework fixes; you can never push content into the shared framework). Framework fixes reach the framework repo only from a content-free **gateway** clone. This is "fork and keep pulling": one source of truth for internals, independent backed-up content per vault.
+The framework (schema, specs, scripts, config) lives once in the **framework repo** `agentic-KB_OMD`. Each knowledge base is its **own repo, cloned from the framework** and renamed to its topic (e.g. `akb-omd_astronomy`) — **not** a GitHub fork (GitHub caps those at one per account; see [[checklist.new-wiki-project]] §0 for the create recipe). A vault has **two remotes**: `origin` = its own repo (push everything here — your backup and how you propagate to new hosts) and `upstream` = the framework repo, **fetch-only** (pull framework fixes; you can never push content into the shared framework). Framework fixes reach the framework repo only from a content-free **gateway** clone. This is "clone and keep pulling": one source of truth for internals, independent backed-up content per vault.
 
 ## Roles
 | Clone | `origin` | `upstream` | commits content? | content-guard hook |
@@ -25,7 +25,7 @@ Git will **not** auto-run a cloned repo's hooks (a security design choice), so t
 
 ## Everyday commands
 - **Back up your work:** `git push origin main`
-- **Pull a framework fix (rare):** `git pull upstream main` — or GitHub's "Sync fork" button. Your content survives; the pull only touches framework files (proven: `upstream` carries no content, so a 3-way merge keeps your files).
+- **Pull a framework fix (rare):** `git pull upstream main`. Your content survives; the pull only touches framework files (proven: `upstream` carries no content, so a 3-way merge keeps your files).
 - **Publish a framework fix (gateway only):** edit → `git commit` → `git push origin main`.
 
 ## What keeps the framework repo clean (the invariant)

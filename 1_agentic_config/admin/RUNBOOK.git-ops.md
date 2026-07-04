@@ -11,7 +11,7 @@ description: Self-contained emergency recovery for the multi-vault git workflow.
 
 ## 30-second model
 - The **framework repo** (`agentic-KB_OMD`) holds shared machinery and MUST stay content-free; its `wiki.index.md` / `_agent_logs.md` are frozen empty **seeds**.
-- Each **vault** (`akb-omd_<topic>`) is a fork: `origin` = its own repo (your content backup), `upstream` = the framework (fetch-only).
+- Each **vault** (`akb-omd_<topic>`) is its own repo cloned from the framework (**not** a GitHub fork): `origin` = its own repo (your content backup), `upstream` = the framework (fetch-only).
 - The single rule that keeps everything working: **no knowledge-base content is ever committed into the framework repo.** Everything below detects and undoes a violation of that rule.
 
 ## First move, always: run the doctor
