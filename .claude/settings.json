@@ -9,7 +9,16 @@
       "Bash(mkdir *)",
       "Bash(head *)",
       "Bash(wc *)",
-      "Bash(jq *)"
+      "Bash(jq *)",
+      "Bash(obsidian help)",
+      "Bash(obsidian backlinks *)",
+      "Bash(obsidian orphans *)",
+      "Bash(obsidian orphans)",
+      "Bash(obsidian unresolved *)",
+      "Bash(obsidian unresolved)",
+      "Bash(defuddle parse *)",
+      "Bash(command -v *)",
+      "Bash(npm ls *)"
     ]
   },
   "hooks": {

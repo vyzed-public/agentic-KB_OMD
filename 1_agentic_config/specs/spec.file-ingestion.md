@@ -1,7 +1,7 @@
 ---
 title: File Ingestion
 created: 2026-06-23
-updated: 2026-06-23
+updated: 2026-07-07
 description: The ingestion process — how a file dropped in 2_using_timeline/ becomes a filed timeline artifact (stamped with intent metadata — purpose/projects/repeat/priority) plus a generated source page and its wiki cross-references. Includes the ingest interview.
 ---
 You will take timeline pages and build four types of generated wiki pages: source/concept/entity/synthesis   
@@ -38,14 +38,14 @@ You will take timeline pages and build four types of generated wiki pages: sourc
 
 Every action goes through one of two paths. **We choose the path here, in the spec, so that at run time there is nothing to deliberate — just execute.** Each step below is tagged with the path it uses.
 
-- **`[direct]` — the default workhorse.** Filesystem tools (`Read`/`Edit`/`Write`/`Bash`). Faster (no round-trip), deterministic, greppable, scriptable, can write **typed** YAML the property API can't (real lists/integers — see step 9), and works even when Obsidian is closed. **When in doubt, direct.**
-- **`[MCP]` — Obsidian-internal only.** The Obsidian Local REST API. Reserved for operations with **no filesystem equivalent**: (a) triggering Obsidian commands (e.g. attachment download), (b) authoritative backlink/graph resolution (Obsidian's live link index, not a regex guess), and (c) moves/renames that must **auto-repoint inbound `[[wikilinks]]`** (`vault_move`, which a raw `mv` does not do).
+- **`[direct]` — the default workhorse.** Filesystem tools (`Read`/`Edit`/`Write`/`Bash`). Faster (no round-trip), deterministic, greppable, scriptable, can write **typed** YAML (real lists/integers — see step 9), and works even when Obsidian is closed. **When in doubt, direct.**
+- **`[obsidian]` — the `obsidian` CLI, authoritative graph queries only.** Obsidian's live link index via the `obsidian` CLI (`backlinks`, `orphans`, `unresolved`) — used only when a regex over link *text* can't be trusted to judge resolution (mainly `lint`; occasionally one ambiguous ingest link). Requires the desktop app running. This replaced the retired Local REST API / MCP path — see [[HISTORY.explored-and-retired]]. Note there is **no** agent command for link-repointing moves anymore; ingest sidesteps needing one by keeping every filing move **name-preserving** (basename unchanged, so inbound `[[basename]]` links survive a raw `mv`).
 
-Two cautions the tags encode: the property API **stringifies** typed frontmatter (why step 9 is `[direct]`), and editing a file on disk that Obsidian has open can race its cache — prefer direct edits when Obsidian isn't mid-write on the same file.
+One caution the tags encode: typed frontmatter (real YAML lists/integers) must be written as literal YAML by a direct `Edit` — why step 9 is `[direct]` — and editing a file on disk that Obsidian has open can race its cache, so prefer direct edits when Obsidian isn't mid-write on the same file.
 
 ## Ingestion Procedure
 
-1. **`[MCP]` MCP check.** If the Obsidian Local REST API MCP server is unreachable, **stop** and notify the curator — nothing downstream can complete without it.
+1. **`[direct]` Preflight.** Ingestion is fully filesystem-based — it needs **no running Obsidian and no MCP.** Nothing here hard-blocks on external tooling; the only external reach is the step-10 attachment localizer (and only if the note carries remote images), which fails loud on its own. *(Authoritative graph queries via the `obsidian` CLI belong to `lint`, not ingest.)*
 
 2. **`[—]` Determine mode of operation** — this sets the default posture for every branch below (pure control decision, no I/O):
    - **Attended** — a curator is present, answering interactively:
@@ -72,7 +72,7 @@ Two cautions the tags encode: the property API **stringifies** typed frontmatter
 4. **`[direct]` Duplicate check.** If `2_using_timeline/YYYY/MM/<name>` already exists, **stop** — already ingested. 
    Offer to rename the new copy `_FIX-DUPE_<name>` (auto-apply in unattended mode).
 
-5. **`[direct]` Imported-link scan** *(foreign-vault markdown imports only — a no-op for web clips and PDFs).* *(Escalate to `[MCP]` backlink resolution only if a link's resolution is genuinely ambiguous — e.g. YAML-wrapped — where a regex can misjudge.)*
+5. **`[direct]` Imported-link scan** *(foreign-vault markdown imports only — a no-op for web clips and PDFs).* *(Escalate to `[obsidian]` `obsidian backlinks` only if a link's resolution is genuinely ambiguous — e.g. YAML-wrapped — where a regex can misjudge.)*
    - **Why.** A note authored in another Obsidian vault carries `[[wikilinks]]` that resolved there but **dangle here**, creating phantom nodes.
    - **Scan** every `[[wikilink]]` the source carries — **body *and* frontmatter** (property links hide in the Properties panel, not the prose).
    - **Inert links don't count.** A body link inside a code span (`` `[[x]]` ``) is not parsed by Obsidian and creates no node — skip it. This is the curator's legitimate way to neutralize a body link.
@@ -96,12 +96,20 @@ Two cautions the tags encode: the property API **stringifies** typed frontmatter
    - **`repeat:`** — only if set in Q4 (otherwise omit).
    - **`priority:`** — a single **integer**, default `0`, always written (Q5).
 
-   Use the **Edit tool, not the property API** — `vault_patch` stringifies a list into `'["..."]'` and an integer into `"1"`, defeating the typed schema. **Anchor the Edit on any existing frontmatter line (e.g. `created:`), leave that line unchanged, and add/replace the four fields around it** — so even a brand-new web clip (which arrives with *none* of the four) is stamped in one pass. This is the *only* agent write allowed into a timeline note (the immutability carve-out). The `timeline-guard.sh` hook enforces it: **an Edit is allowed only when every *changed* line is one of the four fields — `purpose:`, `projects:`, `repeat:`, `priority:` (or a `projects:` `  - ` list item); any change to the body, a `---` fence, or another frontmatter field is blocked**, as are deletes, overwrites, and move-outs.
+   Write it with a direct **Edit** so the values land as **literal typed YAML** — a real list for `projects:` and a bare integer for `priority:` (a stringifying property-setter would mangle them into `'["..."]'` and `"1"`, defeating the typed schema). **Anchor the Edit on any existing frontmatter line (e.g. `created:`), leave that line unchanged, and add/replace the four fields around it** — so even a brand-new web clip (which arrives with *none* of the four) is stamped in one pass. The note is still **staged** here (top-level `2_using_timeline/`), so the guard permits the edit on *location* alone — staging is the mutable work zone. **Discipline (procedure, not guard-enforced): stamp only the four ingest fields; the CTN is the curator's lossless original.** The **seal** is step 11: once filed into `YYYY/MM/`, the note becomes agent-immutable — no further edits, ever. (Location model: [[spec.timeline-guard-hook]].)
    - **Verification gate:** every `[[wikilink]]` written this pass — wiki pages *and* the timeline note's `[[project_<slug>]]` links — must resolve. Stub or plain-text any that don't. Do not finish with dangling links.
 
-10. **`[MCP]` Download attachments** (set active file → "Download attachments for current file"). Images land in `attachments/`. If it fails, stop — do not move the article without its images.
+10. **`[direct]` Localize attachments.** Web clips often embed **remote** images (`![alt](https://…)`) that rot with the source. Localize them headlessly — no Obsidian, no modal (the retired MCP "Download attachments" command is gone; see [[HISTORY.explored-and-retired]]):
 
-11. **`[direct]` File the artifact.** Move any `attachments/` (such as images) to `YYYY/MM/assets/`; move the article → `YYYY/MM/`. Use `mv` within the timeline (basename is preserved, so inbound basename links survive). *Exception: `[MCP]` `vault_move` if a move/rename must auto-repoint inbound `[[wikilinks]]` — not the case for a name-preserving file into `YYYY/MM/`.*
+    ```bash
+    python3 scripts/attachment-localize.py "<staged-note>" "2_using_timeline/attachments/"   # add --dry-run to preview
+    ```
+
+    It downloads each remote image embed into the **staged** `2_using_timeline/attachments/` dir (top-level = mutable zone) under a bash-/wikilink-safe, hash-deduped filename and rewrites the embed to a local `![[basename|alt]]` (basename-only, so the later filing move in step 11 can't break it). Staging assets *inside* the timeline keeps the step-11 filing move `staged → filed` internal, which is the only move the guard's seal allows.
+
+    **Verification gate — do NOT skip (this is the silent-failure guard).** The script exits **`0` only when *every* embed localized**; on any fetch error, HTTP error, zero-byte download, or a remote embed left un-rewritten it exits **non-zero and leaves the note UNCHANGED**. Treat non-zero as a hard **stop** — do not proceed to step 11; **never file a note without its images.** A note with no remote embeds is a clean exit-`0` no-op. (Behavior is pinned by `tests/test-localizer.sh`.)
+
+11. **`[direct]` File the artifact (the SEAL).** Move any staged assets (`2_using_timeline/attachments/`) → `2_using_timeline/YYYY/MM/assets/`, then move the article → `2_using_timeline/YYYY/MM/`. Use `mv` **within** the timeline (basename is preserved, so inbound basename links survive). This move is the **seal**: once filed, the note is agent-immutable — the guard blocks every further write to it. So do this **only after** stamping (step 9) and localizing (step 10) are done and verified. *(The move is **name-preserving** — basename unchanged — so inbound `[[basename]]` links survive the raw `mv`; no link-repointing tool is needed, which is why the retired `vault_move` is not missed here.)*
 
 12. **`[direct]` Set provenance.** On the source page, `ctn: "[[Original Filename]]"` — the timeline note's original name, no path/extension, never a URL. Confirm `title:` holds the verbatim original display name.
 

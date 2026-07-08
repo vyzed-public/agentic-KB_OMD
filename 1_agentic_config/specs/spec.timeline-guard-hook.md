@@ -1,8 +1,8 @@
 ---
 title: 2_using_timeline/ Guard Hook
 created: 2026-06-16
-description: A PreToolUse hook that prevents Claude from deleting or overwriting files in 2_using_timeline/ and from moving files out of it; moves within it (the ingest workflow) and the ingest-stamp Edit carve-out (four fields only) are allowed. Tested and confirmed to hold against direct user instructions.
-updated: 2026-06-30
+description: A PreToolUse hook enforcing LOCATION-BASED timeline immutability. Two zones by path — STAGED (top-level 2_using_timeline/, agent-mutable) and FILED (2_using_timeline/YYYY/MM/, agent-immutable). The one-way filing move seals a note; deletion is curator-only in both zones. Tested and confirmed to hold against direct user instructions.
+updated: 2026-07-06
 ---
 
 # 2_using_timeline/ Guard Hook
@@ -19,14 +19,23 @@ The hook described here is the actual enforcement mechanism. Schema rules are re
 
 ## What It Does
 
-A `PreToolUse` hook fires before every Claude tool call. Targeting `2_using_timeline/`, the hook blocks the action and tells Claude to inform the user when it attempts:
+The guard is **location-based**: a note's mutability is decided by *where it lives*, not by diffing what changed. Two zones under `2_using_timeline/`:
 
-- `Bash` deletes/overwrites — `rm`, `truncate`, `tee`, `dd`, `chmod`
-- `Bash` `mv`/`cp` that moves a file **out** of `2_using_timeline/`
-- `Write` with a file path inside `2_using_timeline/`
-- `Edit` inside `2_using_timeline/` — **except** the ingest-stamp carve-out (below)
+- **STAGED** — top level (`2_using_timeline/<file>`, including the `attachments/` staging dir). **Agent-mutable.** This is the ingest work zone: the agent stamps intent frontmatter and localizes attachments here freely.
+- **FILED** — dated folders (`2_using_timeline/YYYY/MM/…` and their `assets/`). **Agent-immutable.** The one-way filing move `staged → filed` **seals** the note; afterward the agent may only *read* it.
 
-**Allowed:** `Read` (Claude must read sources to ingest them); `mv`/`cp` **within** `2_using_timeline/` — the ingest workflow renames files and moves them into dated `YYYY/MM/` folders (a path appearing **twice** in an `mv`/`cp` command is an internal move and is allowed; a single occurrence is a move out and is blocked); and the **ingest-stamp `Edit`** that writes only the four fields `purpose:` / `projects:` / `repeat:` / `priority:` onto a note's frontmatter (see the carve-out under Setup).
+```
+stage  →  stamp + localize (mutate freely)  →  file (SEAL)  →  generate
+```
+
+A `PreToolUse` hook fires before every Claude tool call; when it blocks, it tells Claude to inform the user. It blocks:
+
+- **Deletion in *either* zone** — `rm`/`rmdir`/`unlink`/`shred`, `find … -delete`, `git clean`. **Deletion is curator-only, everywhere.**
+- **`mv`/`cp` that moves a file *out* of `2_using_timeline/`.**
+- **Any write vector aimed at a FILED note** — redirect (`>`/`>>`), `sed -i`, `tee`, `truncate`, `dd`, `chmod`, `cp` into a filed folder, an interpreter (`python`/`perl`/`ruby`/`node`/`awk`) run over a filed path, or a `Write`/`Edit` tool call with a filed path.
+- **Filed-zone `mv`** other than the seal — un-filing (`filed → staged`) and filed-to-filed renames.
+
+**Allowed:** `Read`, and all reads via Bash (`cat`/`grep`/`ls`/…) in either zone; **every write vector on a STAGED path** (`Write`/`Edit`/redirect/`sed -i`/the localizer/rename-within-staging); and the **filing seal** — an `mv` whose source is staged and whose destination is a filed `YYYY/MM/` location.
 
 ---
 
@@ -48,15 +57,13 @@ Claude refused every time. The hook operates at the tool call level — below th
 
 ## What It Does NOT Protect Against
 
-**This is a picket fence, not a vault door.** It prohibits the obvious `rm` — but there are many ways to destroy files in `2_using_timeline/` that a string-matching PreToolUse hook cannot catch, because it inspects command *verbs* and *path text* and has no concept of "overwrite" (it never checks whether a destination already exists). Known gaps:
+**This is a picket fence, not a vault door.** It inspects command *verbs* and *path text*; a determined route-around still exists. What the location model **does** close (vs. the old verb-only guard): redirect/`sed -i`/`tee`/`truncate`/interpreter writes into a **FILED** note are now blocked (previously a `>` slipped through), and non-`rm` deletion (`find … -delete`, `unlink`, `shred`, `git clean`) is blocked in **both** zones. Remaining gaps:
 
-- **Overwrite by move/copy within the timeline** — `mv blank.md target.md` with both paths inside `2_using_timeline/` passes the "within-timeline move is allowed" rule and clobbers `target.md`; `cp` likewise.
-- **Truncate by redirect** — `: > 2_using_timeline/x.md` or `echo … > 2_using_timeline/x.md`; a shell `>` is not one of the tracked verbs.
+- **The STAGED zone is *intentionally* wide open.** It is the mutable work zone, so `mv blank.md target.md`, `> target.md`, etc. on a top-level `2_using_timeline/` file all pass **by design**. A staged note is protected only *after* it's filed (the seal). Protection of the curator's original therefore depends on filing promptly — a staged note is not yet sealed.
 - **`cd` then a bare command** — once the working directory is inside the timeline, a later `rm x.md` / `> x.md` carries no `2_using_timeline/` text to match.
-- **Non-`rm` deletion** — `find 2_using_timeline/ -delete`, `unlink`, `shred`, `rsync --delete`, `git clean`.
-- **Indirection** — destruction performed inside a script (`bash script.sh`) or an editor; the hook only sees `bash script.sh`.
+- **`rsync --delete`, and indirection** — destruction performed inside a script (`bash script.sh`) or an editor; the hook only sees `bash script.sh`.
 
-The hook stops casual, naive destruction — the founding incident was exactly that (a one-line `rm`). It does **not** provide immutability. For that, enforce it *below* the agent, where no command phrasing can route around it: OS-level read-only permissions or the immutable bit (`chattr +i`), `git` history on the vault, or filesystem snapshots (ZFS/btrfs/Time Machine).
+The hook stops casual, naive destruction and makes **filed** notes durably agent-immutable through every ordinary vector. It does **not** provide true immutability. For that, enforce it *below* the agent: OS-level read-only permissions or the immutable bit (`chattr +i`), `git` history on the vault, or filesystem snapshots (ZFS/btrfs/Time Machine).
 
 ---
 
@@ -64,11 +71,11 @@ The hook stops casual, naive destruction — the founding incident was exactly t
 
 **Hook script:** [1_agentic_config/scripts/timeline-guard.sh](../scripts/timeline-guard.sh)
 
-The canonical hook is the **script file linked above** — this doc deliberately does **not** re-embed it, to prevent drift (a pasted copy here already went stale once). Its behavior, by tool:
+The canonical hook is the **script file linked above** — this doc deliberately does **not** re-embed it, to prevent drift (a pasted copy here already went stale once). Its behavior, by tool (STAGED = top-level; FILED = `YYYY/MM/…`):
 
-- **`Bash`** — blocks `rm`/`truncate`/`tee`/`dd`/`chmod` touching `2_using_timeline/`; blocks `mv`/`cp` that moves a file **out** (the `2_using_timeline/` path appears once); allows moves **within** it (the path appears twice or more — the ingest workflow).
-- **`Write`** — blocks any path inside `2_using_timeline/`.
-- **`Edit`** — blocks any path inside `2_using_timeline/` **except the ingest-stamp carve-out**: allow the Edit only when every *changed* line (vs. the original) is one of the four ingest fields — `purpose:` / `projects:` / `repeat:` / `priority:` — or a `projects:` `  - ` list item; an *unchanged* anchor line (e.g. `created:`) may be anything (this lets a fresh web clip get all four stamped in one Edit). Body, `---` fence, and other-field changes stay blocked. Rationale: the Obsidian property API (`vault_patch`) can only write *string* frontmatter — it stringifies a YAML list into `'["..."]'` and an integer into `"1"` — so stamping the typed `projects:` list and `priority:` integer requires a direct `Edit`, which the guard scopes to exactly those four fields. Full detail: [[spec.file-ingestion]] step 9.
+- **`Bash`** — blocks deletion (`rm`/`rmdir`/`unlink`/`shred`, `find … -delete`, `git clean`) in **either** zone; blocks `mv`/`cp` that moves a file **out** of the timeline (one timeline path in the command); allows moves **within** it. For a **FILED** path it additionally blocks every write vector (redirect, `sed -i`, `tee`, `truncate`, `dd`, `chmod`, `cp`-into, interpreters) and any `mv` other than the incoming seal. **STAGED** paths get every write vector allowed.
+- **`Write`** — blocks a **FILED** path; allows a **STAGED** path (the localizer/staging work zone).
+- **`Edit`** — blocks a **FILED** path; allows a **STAGED** path. This **replaces the old four-field content-diff carve-out**: because a note being stamped is still staged (pre-seal), the guard permits the edit on *location* alone — no line-by-line diffing. The discipline of touching only `purpose:`/`projects:`/`repeat:`/`priority:` at stamp time is now a **procedure** rule ([[spec.file-ingestion]] step 9), not a guard check. (Stamping uses a direct `Edit` because typed frontmatter — the `projects:` list and `priority:` integer — must land as literal YAML; the guard no longer inspects *which* fields change.)
 
 **Wire into `.claude/settings.json` (project-level):**
 

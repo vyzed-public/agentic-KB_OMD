@@ -18,9 +18,9 @@ Settings → **Files & Links**:
 
 ---
 
-## 2. Community Plugin — Local REST API with MCP
+## 2. Community Plugin — Repeat (+ vendored skills)
 
-Required for the ingest workflow (set the active file, trigger "Download attachments for current file"). The full per-vault setup — install, port assignment, API key, `claude mcp add` registration — is documented in [[setup.obsidian-MCP]]. **Set it up according to that spec.**
+The framework ships the **Repeat** plugin (`.obsidian/plugins/repeat-plugin/`) for spaced review of filed sources, plus the vendored Claude skills in `.claude/skills/`. Just **confirm** the plugin is enabled (Settings → Community Plugins → **Repeat**). Attachments are localized directly by the agent (no plugin), and authoritative graph queries come from the per-machine `obsidian` CLI. Full detail — including the two per-machine CLI installs (`obsidian`, `defuddle`) — is in [[setup.obsidian-tooling]]. *(The old Local REST API / MCP path has been retired — see [[HISTORY.explored-and-retired]].)*
 
 ---
 
@@ -32,7 +32,7 @@ Route Obsidian's daily notes into the ingest landing zone so they follow the sam
 
 ## 4. Web Clipper
 
-The Obsidian Web Clipper deposits clips into the currently focused vault window. The clip's `title:` is pulled from the browser tab — rename the tab to something meaningful *before* clipping if you want a specific title. Multi-vault routing behavior: see Web Clipper Routing in [[setup.obsidian-MCP]].
+The Obsidian Web Clipper deposits clips into the currently focused vault window. The clip's `title:` is pulled from the browser tab — rename the tab to something meaningful *before* clipping if you want a specific title. Multi-vault routing behavior: see Web Clipper Routing in [[setup.obsidian-tooling]].
 
 **Strip the `wikilink` filter from the `author` property.** The Web Clipper's default template formats the author with a `wikilink` filter — `{{author|split:", "|wikilink|join}}` — which wraps every author name in `[[ ]]`. Because no author note exists in the vault, that drops a **dangling `[[Author Name]]` into the frontmatter of every clip** — an orphan link / phantom node. Reconfigure the `author` property (in the Web Clipper template's **Properties** section) to emit **plain text** instead:
 

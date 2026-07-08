@@ -11,6 +11,34 @@ description: A user primer on handoff files — how to preserve working context 
 
 ## Copy-paste prompts (grab & go)
 
+### My personal TL;DR (using latest rounds):
+
+```
+Use today's date and time to name a [HANDOFF_FILE] at `../handoff.YYYY-MM-DD-HH-MM-SS.md` 
+```
+
+```
+Create or overwrite this [HANDOFF_FILE] so a fresh session can pick up cleanly. 
+Capture: what we completed this session (with concrete results — commit hashes, 
+file paths, verified state), the ordered NEXT steps, as well as key findings, 
+including mistakes, and any resulting key decisions made and *WHY*.
+Be ESPECIALLY sure to capture any gotchas/landmines. 
+Keep it high-signal; point to durable docs rather than re-explaining them. 
+Overwrite in place — it's a current-state snapshot, not a log. 
+```
+
+```
+Read the latest [HANDOFF_FILE] we just saved.
+This is my handoff file with the current state of our work. 
+Load it fully, then give me a short status report; 
+Then bullet points for what's DONE, what's NEXT, 
+and ESPECIALLY any GOTCHA issues I should know before we start. 
+Don't begin new work until I confirm.
+```
+
+
+---
+
 Two prompts cover almost everything. Substitute the one placeholder, paste, done.
 
 **Substitute:** `<HANDOFF_PATH>` → the absolute path to your handoff file

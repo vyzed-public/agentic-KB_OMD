@@ -14,13 +14,23 @@ Our INTENT is:
 * thereby enabling **[[mission.rescue-the-curator|a mission to rescue knowledge curators]]**.
 
 ---
+## ⛔ Agent Command Hygiene (Claude Code harness) — READ EVERY SESSION
+
+**Non-negotiable. These stop the curator from being buried in permission prompts. Violating them is the single most common way this agent annoys the curator.**
+
+1. **Never lead a Bash command with `cd`.** The working directory persists between calls — use absolute or repo-relative paths. A leading `cd` (especially out-of-tree) forces a permission prompt.
+2. **One command per Bash call — do NOT chain.** No `&&` / `;` / multi-stage pipe bundles (`echo … && grep … | … && cat …`). A compound command matches no single allowlist prefix, so the *whole thing* prompts. Issue separate, single-purpose calls (independent ones can run in parallel in one turn).
+3. **Prefer the Read / Grep / Glob tools** over `bash cat`/`grep`/`ls`/`find` — they don't hit the permission-prompt path at all.
+4. When prompts recur it is almost always a violation of 1–3, **not** a missing allowlist entry — fix the style *first*. Rationale + cross-project adoption: memory `feedback-permission-prompt-reduction`.
+
+---
 ## Infrastructure
 
-### Obsidian Local REST API (MCP)
+### Obsidian CLI (`obsidian`)
 
-The **obsidian-local-rest-api** community plugin runs inside Obsidian and exposes an MCP server. This gives Claude Code native tool access to Obsidian internals — specifically the ability to set the active file and trigger Obsidian commands such as "Download attachments for current file."
+The official **`obsidian` command-line interface** gives the agent authoritative access to Obsidian's live link index — `unresolved` (dangling links), `orphans`, and `backlinks` — used during `lint`. It requires the Obsidian desktop app to be running (it connects to the live app over a local socket); no ports or API keys. Setup, plus the Flatpak socket-bridge gotcha, is in [[setup.obsidian-tooling]].
 
-The MCP server must be running (Obsidian open, plugin active and authenticated) for the full ingest workflow to function. Check server status at the start of every ingest.
+This **replaced the retired Local REST API / MCP server.** Attachment localization is now done directly by the agent (a fetch-and-rewrite localizer — no Obsidian command, no running app needed); everything else is direct filesystem. Why MCP was dropped: [[HISTORY.explored-and-retired]].
 
 ---
 ## Session Startup
@@ -28,7 +38,13 @@ The MCP server must be running (Obsidian open, plugin active and authenticated) 
 Before doing anything else, in order:
 
 1. **Verify symlink integrity.** `readlink CLAUDE.md` should print `AGENTS.md` — confirm you're acting on the canonical schema, not a drifted copy. If it has become a regular file (it has happened — a copy silently replaces the symlink and the two diverge), do **not** overwrite it: `diff AGENTS.md CLAUDE.md`, migrate any content unique to `CLAUDE.md` into `AGENTS.md`, then restore the link with `ln -sf AGENTS.md CLAUDE.md`. Report the drift to the user either way.
-2. **Verify MCP health.** Confirm the Obsidian Local REST API MCP server is reachable. If it's **down, warn the user loudly and immediately** — ingest and attachment operations are dead until it's fixed. Query and admin/config work may still proceed (this is a warning, not a hard stop).
+2. **Verify Obsidian CLI health.** Run a light command (e.g. `obsidian help`) to confirm the `obsidian` CLI reaches the running app. **On failure** — commonly `unable to find Obsidian` when Obsidian is installed as a Flatpak/Snap — first **self-heal the socket bridge**, then retry once:
+   ```bash
+   [ -d "$HOME/.var/app/md.obsidian.Obsidian" ] && \
+     ln -sf "/run/user/$(id -u)/.flatpak/md.obsidian.Obsidian/xdg-run/.obsidian-cli.sock" \
+            "/run/user/$(id -u)/.obsidian-cli.sock" 2>/dev/null
+   ```
+   (per [[setup.obsidian-tooling]]). If it **still** fails, **warn the user loudly and immediately.** The blast radius is narrow: only `lint`'s authoritative graph queries (`unresolved`/`orphans`/`backlinks`) are affected — and they fall back to best-effort grep — while ingest, query, and admin/config all work without it. This is a warning, not a hard stop.
 3. **Restore context.** Read the last 10 entries of the current month's log (`1_agentic_config/logs/YYYY-MM.md`; if it's early in the month with fewer than 10 entries, also read the tail of the previous month's file). The hub note `1_agentic_config/logs/_agent_logs.md` indexes every monthly log file.
 
 ---

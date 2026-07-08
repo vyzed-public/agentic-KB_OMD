@@ -1,10 +1,10 @@
-# New Wiki Project Checklist
+# Deploy a New Knowledge Base — Checklist
 
-Follow this in order for a deterministic setup. Steps marked **(one-time)** only need to be done once per machine — skip them if already in place.
+Follow this in order to **deploy** a new knowledge base from the shared framework. You are *deploying*, not building — the framework already exists; you clone it and configure your own copy. Steps marked **(one-time)** only need doing once per machine — skip them if already in place.
 
 ---
 
-## 0. Distribution Model — Clone & Keep Pulling (read first)
+## 0. Deployment Model — Clone & Keep Pulling (read first)
 
 One framework repo (`agentic-KB_OMD`) holds the schema, specs, scripts, and config. Each knowledge base is its **own independent GitHub repo, cloned from the framework** — so it shares the framework's history (fixes pull in cleanly) while your notes back up to your own repo. Full model + recovery: [[spec.git-ops]] and [[RUNBOOK.git-ops]].
 
@@ -13,7 +13,7 @@ One framework repo (`agentic-KB_OMD`) holds the schema, specs, scripts, and conf
 > - **Use this template:** creates a repo with *unrelated* git history, which makes `git pull upstream main` fail.
 > - **Cloning the framework into your own new repo** (below) avoids both: **unlimited** knowledge bases, and clean framework-fix pulls. This is the only supported path.
 
-### A. Stand up a new knowledge base — just execute, top to bottom
+### Stand up your knowledge base — just execute, top to bottom
 
 Pick two values, then run each block in order. Nothing to decide.
 
@@ -58,7 +58,7 @@ upstream  DISABLED (push)
 
 > **⚠ Check the repo name matches character-for-character.** A one-letter difference (e.g. `AI-lightcone` vs `AI-light-cone`) points `origin` at a *different* repo and silently splits your work across two — and `git push` won't warn you if that other name also happens to exist. If the name is wrong, fix it: `git remote set-url origin <correct-url>` then `git push -u origin main`, and delete the stray empty repo on GitHub.
 
-**A5 · Finish the vault.** Then **§2** (open the cloned folder as an Obsidian vault), **§3** (Obsidian MCP — port/key/registration), **§4** (daily notes), and **§6, §8, §9**. **Skip §5 and §7** (from-scratch only) — a clone already has the guard hook and a bootstrapped wiki.
+**A5 · Finish deploying.** Work through the rest of this checklist: **§2** (open the cloned folder as an Obsidian vault), **§3** (Obsidian tooling — CLI, plugin, skills), **§4** (daily notes), **§5** (open Claude Code), **§6** (confirm), **§7** (add your first source).
 
 **Everyday, from then on — just two commands:**
 
@@ -68,15 +68,9 @@ upstream  DISABLED (push)
 | `git pull upstream main` | Pulls a framework fix when one ships — **your content survives the merge** |
 
 **What lives where:**
-- **Framework** (schema, `1_agentic_config/`, `AGENTS.md`/`CLAUDE.md`, `.claude/settings.json` with the portable guard hook, `setup.sh`, `.githooks/`) — shared; you *pull* fixes from `upstream`. Framework fixes are published only from a content-free **gateway** clone (see [[spec.git-ops]]).
-- **Content** (your ingested notes + generated wiki) — committed to *your own* repo's `origin` (backup + propagation), never pushed to the shared framework. The push-disabled `upstream` enforces this.
-- **Never committed** (gitignored): `.claude/settings.local.json` (personal grants), the **Local REST API key** in `.obsidian/plugins/*/data.json` (per-vault — §3c), and Obsidian per-user UI state.
-
-### B. From scratch (only to author a *new* framework, not a knowledge base)
-
-§2 (copy files), §5 (create `settings.json`), and §7 (bootstrap `AGENTS.md`) describe building a vault from nothing — needed only to create a brand-new framework, not to stand up a KB from the existing one.
-
-The one-time (§1) and per-vault (§3, §4) steps apply to **both** paths.
+- **Framework** (schema, `1_agentic_config/`, `AGENTS.md`/`CLAUDE.md`, `.claude/settings.json` with the portable guard hook, `.claude/skills/` (vendored Obsidian skills), `.obsidian/plugins/repeat-plugin/`, `setup.sh`, `.githooks/`) — shared; you *pull* fixes from `upstream`. Framework fixes are published only from a content-free **gateway** clone (see [[spec.git-ops]]) — you never push into the shared framework.
+- **Content** (your ingested notes + generated wiki) — committed to *your own* repo's `origin` (backup + propagation). The push-disabled `upstream` enforces this.
+- **Never committed** (gitignored): `.claude/settings.local.json` (personal grants) and Obsidian per-user UI state.
 
 ---
 
@@ -101,83 +95,58 @@ Implement this setup exactly as described.
 
 ## 2. Open the Vault in Obsidian
 
-**Cloned vault (§0 path A — the normal case):** the clone already contains *everything* — the framework files, the `.obsidian/` app settings, and the MCP plugin. There is **nothing to copy or assemble.** You just point Obsidian at the folder:
+The clone already contains *everything* — the framework files, the `.obsidian/` app settings, the **Repeat** plugin, and the vendored Claude skills. There is **nothing to copy or assemble.** You just point Obsidian at the folder:
 
 - Obsidian → the **vault switcher** (bottom-left, the current vault's name) → **Manage vaults…** → **Open folder as vault** → pick your cloned `akb-omd_<TOPIC>` directory. *(On a fresh Obsidian launch, the "Manage vaults" window offers **Open folder as vault** directly.)*
 
 Because the framework ships the Obsidian app settings and the plugin, they're already in place — you do **not** re-apply [[checklist.obsidian.setup]] or install anything. Skim that doc only if something looks off.
 
-> **From-scratch path only (§0 path B — authoring a _new_ framework):** there's no clone to open, so instead create an empty directory, open it as a vault, then assemble the framework by hand — copy these seed files from an existing vault's `1_agentic_config/`, and apply the app settings in [[checklist.obsidian.setup]] (Wikilinks, link format, Detect all file extensions) + install the plugins it lists:
-> - `1_agentic_config/admin/mission.rescue-the-curator.md` ← the foundational rationale — read it first
-> - `1_agentic_config/specs/pattern.karpathy-llm-wiki.md`
-> - `1_agentic_config/admin/setup.claude-code-UX.md`
-> - `1_agentic_config/admin/setup.obsidian-MCP.md`
-> - `1_agentic_config/admin/checklist.new-wiki-project.md`
-> - `1_agentic_config/admin/checklist.obsidian.setup.md`
+---
+
+## 3. Obsidian Tooling Setup
+
+The wiki agent uses a small set of Obsidian tools. **Most ship with your clone** — you just confirm they're present. Only the two command-line **binaries** are per-machine, one-time installs. There are **no ports, keys, or registrations** — that whole apparatus (the retired MCP/Local-REST-API path) is gone; see [[HISTORY.explored-and-retired]] for why.
+
+Full detail: [[setup.obsidian-tooling]]. The short version:
+
+**a. Confirm the shipped tools are present** (they travel with the clone — do **not** reinstall):
+
+```bash
+ls .claude/skills/          # expect: obsidian-cli/  obsidian-bases/  defuddle/
+```
+And in Obsidian → Settings → Community Plugins → confirm **Repeat** is listed and toggled on. *(Optional — it powers spaced review of filed sources via `repeat:`. Leave off if you don't want it.)* If the skills folder or plugin is missing, the clone didn't come through cleanly — re-clone per §0.
+
+**b. Enable the Obsidian CLI (one-time, per machine).** Used for authoritative graph queries during `lint` (`unresolved`/`orphans`/`backlinks`). It's **built into the desktop app** (Obsidian **1.12.7+**) — *not* an `npm`/package install: enable it via **Settings → General → Command line interface** and follow the registration prompt (on Linux the binary lands in `~/.local/bin` — ensure it's on your `PATH` — then restart your terminal). Full steps + gotchas: [[setup.obsidian-tooling]]. With Obsidian **running**, verify:
+
+```bash
+obsidian help
+obsidian backlinks file="<some note>"
+```
+
+No ports, no keys. *(Flatpak/Snap Obsidian? `obsidian help` may report "unable to find Obsidian" even when it's running — the sandbox hides the CLI socket. Fix: the one-time `~/.profile` socket bridge in [[setup.obsidian-tooling]].)*
+
+**c. Install Defuddle (one-time, per machine).** Clean URL→markdown extraction, used when the agent fetches a web page directly:
+
+```bash
+npm install -g defuddle
+defuddle parse https://example.com --md   # verify
+```
+
+That's the whole setup — no per-vault configuration at all.
 
 ---
 
-## 3. Obsidian MCP Setup (per vault)
+## 4. Confirm Daily Notes → `2_using_timeline/`
 
-> **📦 Heads-up — the plugin ships with the clone. This is intentional, not a mistake.**
-> The framework repo deliberately tracks the **"Local REST API with MCP"** plugin code in `.obsidian/plugins/obsidian-local-rest-api/`, so a vault you cloned per §0 **already has the plugin installed and enabled** the first time you open it. That's the "para-drop and go" design. **Do not be surprised to see it already there, and do not reinstall it.**
->
-> What does **not** ship (it's gitignored) is the plugin's `data.json` — which holds this vault's **port and API key**. So those two, plus the one-time MCP registration, are the *only* genuinely per-vault steps. That's exactly what a–e below cover.
+Obsidian's daily notes route into the `2_using_timeline/` landing zone so they flow through the same ingest workflow as any other source file.
 
-See [[setup.obsidian-MCP]] for full details; the short version:
+**This should already be set by virtue of the repo** — `.obsidian/daily-notes.json` is tracked in the framework, so it travels with your clone (**New file location** = `2_using_timeline`, **Date format** = `YYYY-MM-DD`). So normally this is just a **confirm** — nothing to do.
 
-**a. Confirm the plugin is enabled** *(cloned vault)* — or **install it** *(from-scratch vault only)*
+**If for some reason it didn't come through**, set it the normal Obsidian way — through **Settings**, not by editing files (the `.obsidian/` folder is hidden and isn't reachable from Obsidian's file explorer anyway):
 
-A vault cloned per §0 already ships **"Local REST API with MCP"** enabled — just confirm: Obsidian → Settings → Community Plugins → it's listed and toggled on. Only if it's *absent* (from-scratch path): Browse → **"Local REST API with MCP"** → Install → Enable.
-
-**b. Assign a unique port** — ⚠ **required; a clone defaults to 27124 and will collide**
-
-Because `data.json` didn't travel, the plugin comes up on the **default port 27124** — the *same as your first vault* — so you must change it. **Don't guess, and don't try to remember which ports you've already used.** Ask the registry:
-
-```bash
-bash 1_agentic_config/scripts/next-obsidian-port.sh
-```
-
-It reads your Claude Code MCP registrations (the durable record of every vault's port) plus anything currently listening, prints the ports **in use**, and hands you the **next free one** — along with the exact `claude mcp add` line for step d. Set the plugin to that port: Obsidian → Settings → Local REST API with MCP → **Port**.
-
-*(Or simply ask Claude — "what's the next free Obsidian port?" — it runs the same check and tells you.)*
-
-**c. Get the API key**
-
-On first enable, the plugin generates **this vault's own** key into `data.json` (gitignored — it never shipped, so it is *not* another vault's key). Copy it: Obsidian → Settings → Local REST API with MCP → **API Key**.
-
-**d. Register with Claude Code**
-
-```bash
-claude mcp add --transport http obsidian-<vaultname> https://127.0.0.1:<PORT>/mcp/ \
-  --header "Authorization: Bearer <API_KEY>" \
-  -s user
-```
-
-Use a short, stable name for `obsidian-<vaultname>` (e.g. `obsidian-research`, `obsidian-work`).
-
-**e. Record credentials**
-
-Add a row to the credentials table in `1_agentic_config/admin/setup.obsidian-MCP.md` in this vault.
-
-> MCP servers only load at session start — restart Claude Code after registering.
-
----
-
-## 4. Configure Daily Notes → `2_using_timeline/`
-
-Route Obsidian's daily notes into the `2_using_timeline/` landing zone so they follow the same ingest workflow as any other source file.
-
-Create `.obsidian/daily-notes.json` in the vault with:
-
-```json
-{
-  "folder": "2_using_timeline",
-  "format": "YYYY-MM-DD"
-}
-```
-
-Or via Obsidian: **Settings → Daily notes → New file location → `2_using_timeline`**, Date format → `YYYY-MM-DD`.
+- Obsidian → **Settings → Daily notes** *(a core plugin — already enabled in your clone)*
+- **New file location** → `2_using_timeline`
+- **Date format** → `YYYY-MM-DD`
 
 Daily notes land in `2_using_timeline/` root as `YYYY-MM-DD.md` — pending ingest like any other dropped file. After ingest they move to `2_using_timeline/YYYY/MM/`.
 
@@ -185,81 +154,35 @@ Daily notes land in `2_using_timeline/` root as `YYYY-MM-DD.md` — pending inge
 
 ---
 
-## 5. Set Up the timeline-guard Hook *(from-scratch path only — a template clone already has this)*
+## 5. Start Claude Code in the Vault
 
-Copy `1_agentic_config/scripts/timeline-guard.sh` into the new vault, then create `.claude/settings.json` with:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/1_agentic_config/scripts/timeline-guard.sh\""
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Use `$CLAUDE_PROJECT_DIR`, never an absolute path.** Claude Code sets `$CLAUDE_PROJECT_DIR` to the vault root at runtime, so the hook resolves wherever the vault is dropped and whatever the directory is renamed to — this is what makes the guard survive a para-drop. A hardcoded path silently breaks the guard in every clone (the exact "silent rule-violation" class the schema warns about). See [[1_agentic_config/specs/spec.timeline-guard-hook]] for full details.
-
----
-
-## 6. Open Claude Code in the New Vault
+Now — and only now — start Claude Code from inside the vault:
 
 ```bash
-cd /path/to/new-vault
+cd /path/to/your-vault
 claude
 ```
 
----
-
-## 7. Bootstrap the Wiki
-
-In the new Claude session, pass this prompt:
-
-```
-@pattern.karpathy-llm-wiki.md
-
-You are now my LLM wiki agent for this vault.
-Implement this spec as my complete second brain:
-- Create AGENTS.md with full schema and rules (and CLAUDE.md as a symlink to it)
-- Set up wiki.index.md and 1_agentic_config/logs/ (monthly log file YYYY-MM.md + _agent_logs.md hub)
-- Create the folder structure (2_using_timeline/, 3_generates_wiki/sources/, 3_generates_wiki/concepts/, 3_generates_wiki/entities/, 3_generates_wiki/synthesis/)
-- Ingest this spec file itself as the first source
-
-From now on, every interaction follows the schema.
-```
+You're now inside the interactive Claude Code CLI, with the vendored skills available on demand.
 
 ---
 
-## 8. Confirm Setup
+## 6. Confirm the Deployment
 
-After Claude finishes, verify these files exist:
+Your clone brought the whole framework; confirm it arrived intact and the tooling is present:
 
-- [ ] `AGENTS.md` (and `CLAUDE.md` symlink)
+- [ ] `AGENTS.md` (and `CLAUDE.md` symlink → `AGENTS.md`)
 - [ ] `wiki.index.md`
-- [ ] `1_agentic_config/logs/` (with `_agent_logs.md` hub + current month's `YYYY-MM.md`)
-- [ ] `2_using_timeline/`
-- [ ] `3_generates_wiki/sources/`
-- [ ] `3_generates_wiki/concepts/`
-- [ ] `3_generates_wiki/entities/`
-- [ ] `3_generates_wiki/synthesis/`
+- [ ] `1_agentic_config/logs/` (with the `_agent_logs.md` hub)
+- [ ] `2_using_timeline/` and `3_generates_wiki/{sources,concepts,entities,synthesis}/`
 - [ ] `1_agentic_config/scripts/timeline-guard.sh` (executable)
-- [ ] `.claude/settings.json` (hook wired)
-- [ ] At least one entry in the current month's log file (`1_agentic_config/logs/YYYY-MM.md`)
-- [ ] At least one entry in `wiki.index.md`
-- [ ] MCP tools reachable (`vault_list` returns this vault's files)
+- [ ] `.claude/settings.json` (guard hook wired via `$CLAUDE_PROJECT_DIR`)
+- [ ] `.claude/skills/` contains `obsidian-cli/`, `obsidian-bases/`, `defuddle/`
+- [ ] `obsidian help` works (CLI installed; Obsidian running)
 
 ---
 
-## 9. Add Your First Real Source
+## 7. Add Your First Real Source
 
 Drop a file into `2_using_timeline/`, then tell Claude:
 

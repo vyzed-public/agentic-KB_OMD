@@ -22,10 +22,11 @@ ln -sf AGENTS.md "$DST/CLAUDE.md"
 if [ -f "$SRC/README.md" ]; then cp "$SRC/README.md" "$DST/README.md"; fi
 if [ -f "$SRC/LICENSE" ];   then cp "$SRC/LICENSE"   "$DST/LICENSE";   fi
 
-# --- .claude: settings.json + commands (NOT settings.local.json) ---
+# --- .claude: settings.json + commands + vendored skills (NOT settings.local.json) ---
 mkdir -p "$DST/.claude/commands"
 cp "$SRC/.claude/settings.json" "$DST/.claude/settings.json"
 if [ -d "$SRC/.claude/commands" ]; then cp -r "$SRC/.claude/commands/." "$DST/.claude/commands/"; fi
+if [ -d "$SRC/.claude/skills" ];   then cp -r "$SRC/.claude/skills"     "$DST/.claude/skills";   fi
 
 # --- 1_agentic_config: specs, admin, scripts, tests, tools (verbatim); logs reset below ---
 mkdir -p "$DST/1_agentic_config/logs"
@@ -98,10 +99,23 @@ _(none yet)_
 - [[pattern.karpathy-llm-wiki]] — the founding pattern
 EOF
 
-# --- SECRET SAFETY GATE: never ship a skeleton with a key-looking string in the framework docs ---
-if grep -rInE '`[0-9a-fA-F]{32,}`' "$DST/1_agentic_config" "$DST/AGENTS.md" 2>/dev/null; then
+# --- SECRET SAFETY GATE: never ship a skeleton carrying a secret or a secret-bearing file ---
+# (1) No secret-bearing file may exist ANYWHERE in the skeleton.
+secret_files=$(find "$DST" \( -name settings.local.json -o -name data.json -o -name '*.pem' \
+                               -o -name '.env' -o -name workspace.json \) 2>/dev/null)
+if [ -n "$secret_files" ]; then
   echo "" >&2
-  echo "‼ ABORT: possible secret (32+ hex) still present in the skeleton (listed above). Do NOT ship. Scrub the source and rebuild." >&2
+  echo "‼ ABORT: secret-bearing file(s) present in the skeleton — do NOT ship:" >&2
+  echo "$secret_files" >&2
+  exit 1
+fi
+# (2) No secret-LOOKING string ANYWHERE in the skeleton (whole tree, not just docs). Exclude
+#     vendored *.js bundles — third-party, keys never live there, and minified JS false-positives.
+if grep -rInE --exclude='*.js' \
+     '`[0-9a-fA-F]{32,}`|Bearer[[:space:]]+[A-Za-z0-9._-]{20,}|-----BEGIN[[:space:]][A-Z ]*PRIVATE KEY-----|\b(sk|ghp|gho|ghu|ghs)-[A-Za-z0-9]{20,}|\bxox[baprs]-[A-Za-z0-9-]{10,}' \
+     "$DST" 2>/dev/null; then
+  echo "" >&2
+  echo "‼ ABORT: possible secret (32+ hex, Bearer token, sk-/ghp-/xox- token, or PEM private key) present in the skeleton (listed above). Do NOT ship. Scrub the source and rebuild." >&2
   exit 1
 fi
 

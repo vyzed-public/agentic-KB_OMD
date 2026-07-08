@@ -1,7 +1,7 @@
 ---
 title: Lint / Health Check
 created: 2026-06-29
-updated: 2026-06-29
+updated: 2026-07-07
 description: The lint (health-check) operation — the full checklist the agent runs on demand over the wiki graph (dangling wikilinks, frontmatter type-marker conflicts, orphans, contradictions, stale claims, missing pages/cross-refs, cluster coherence) and how to resolve each. AGENTS.md's Lint op is a dovetail pointing here.
 ---
 
@@ -9,8 +9,18 @@ description: The lint (health-check) operation — the full checklist the agent 
 
 **Trigger:** the human says **"lint"** or **"health check."**
 
+## Graph queries — the `obsidian` CLI is authoritative (grep is the fallback)
+
+Three checks below are graph questions Obsidian answers authoritatively from its **live link index**. Ask the CLI; don't eyeball them. Run bare `obsidian` if it's on `PATH`, else `~/.local/bin/obsidian`.
+
+- **Dangling links** → `obsidian unresolved` — every link target that resolves to no file. Then **scope by zone** (per the dangling-links check below): *fix* `3_generates_wiki/` danglers, *flag* timeline source-note danglers, and ignore `4_collaboration/` (historical chat artifacts). Note it reports note-wikilink targets; a missing image/attachment `![[embed]]` may not appear, so spot-check filed CTNs' assets separately.
+- **Orphans** → `obsidian orphans`, then **keep only `3_generates_wiki/` content pages** (concepts/entities/sources/synthesis). The CLI returns *raw vault-wide* orphans, so it will also list scripts, configs, `2_using_timeline/` files, root files, and `wiki.index.md` (the catalog hub — a legitimate non-orphan). All of that is noise for this check; a wiki *content* page with no inbound links is the real finding.
+- **Backlinks / cluster coherence** → `obsidian backlinks file="<Note>"` (add `counts` or `format=json`) to confirm a page is woven in where it should be.
+
+**If the CLI is unreachable** (Obsidian not running, or the Flatpak socket bridge is down — see [[setup.obsidian-tooling]] and AGENTS.md startup step 2), fall back to a **best-effort `grep`** over `[[wikilinks]]` and **say so in the report** — a regex can't reproduce Obsidian's real resolution rules, so mark those results approximate.
+
 Check for and report:
-- **Dangling wikilinks (errors, not warnings)** — scan **every note's `[[links]]`, across `3_generates_wiki/` *and* the timeline source notes, in both the body *and* the frontmatter/properties** (`parent(s):`, `related:`, `transcript:`, `ctn:`, …). Frontmatter links are the easiest to miss — they live in the Properties panel, not the prose, and the body backtick trick can't silence them (YAML isn't markdown). A link is dangling if it resolves to no file. Judge resolution by Obsidian's **real** rules (each learned the hard way — verify against the live link graph via the Obsidian MCP `vault_read` backlinks, don't assume):
+- **Dangling wikilinks (errors, not warnings)** — scan **every note's `[[links]]`, across `3_generates_wiki/` *and* the timeline source notes, in both the body *and* the frontmatter/properties** (`parent(s):`, `related:`, `transcript:`, `ctn:`, …). Frontmatter links are the easiest to miss — they live in the Properties panel, not the prose, and the body backtick trick can't silence them (YAML isn't markdown). A link is dangling if it resolves to no file. Judge resolution by Obsidian's **real** rules (each learned the hard way — verify against the live link graph via the `obsidian` CLI (`obsidian unresolved` / `obsidian backlinks` / `obsidian orphans`), don't assume):
   - Links resolve by **filename only** — exact basename (case-insensitive) *or* full vault-relative path (`[[3_generates_wiki/concepts/foo]]` resolves). **`aliases:` do NOT resolve `[[wikilinks]]`** — they only feed Quick Switcher/search, so an alias never rescues a display-name link.
   - Links inside **code spans / backticks** (`` `[[x]]` ``) are **inert** — not links; do not flag them.
   - **Fix generated-page** danglers: point at the slug (slug-pipe `[[slug|Display]]`), stub the target, or make it plain text.
