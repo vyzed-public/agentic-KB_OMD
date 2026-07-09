@@ -74,6 +74,24 @@ upstream  DISABLED (push)
 
 ---
 
+## 0.5 Optional — Encrypt This Vault's Content (choose a privacy tier)
+
+> **⏳ PLANNED — the enabling tooling is not yet shipped.** This documents the *decision* you make at deploy time; the one-command `git-crypt` enablement lands in a future release. For now, deploy Tier 0 (private) and revisit when the tooling ships — or enable Tier 1 manually per [[spec.content-encryption]].
+
+Content vaults hold your (potentially sensitive) notes. The **framework repo is never encrypted** — this is a per-*content-vault* choice, made **before the first content commit** (retrofitting onto plaintext history is a painful rewrite). Pick ONE tier:
+
+| Tier | What protects your content | Filenames hidden? | Cost |
+|---|---|---|---|
+| **0 — Private only** | GitHub-private repo (access control) | No | none |
+| **1 — Content-encrypted** | git-crypt encrypts note bodies + images at rest | **No** — titles/dates/names still visible | ~none |
+| **2 — Fully opaque** | git-remote-gcrypt (contents + filenames + history) | Yes | high (remote not browsable) |
+
+**How to choose:** are only the *contents* sensitive, or the *titles / dates / entity-names* too? Contents only → **Tier 1**. Titles themselves are secret → **Tier 2**. Neither → **Tier 0**. Full detail — the filename limitation, key management, and operating rules — is in **[[spec.content-encryption]]**.
+
+> **⚠ CRITICAL — an encrypted vault MUST be single-writer.** Encryption stores notes as binary blobs that git **cannot merge.** Editing the same encrypted note on two machines before syncing can produce an unresolvable ciphertext conflict that **scrambles or destroys the note — a catastrophic, often unrecoverable loss.** If you choose Tier 1 or 2 you **must pull before editing and push right after**, and never edit the vault on a second machine until the first has pushed. Cannot guarantee that? **Choose Tier 0.** Full rule: [[spec.content-encryption]].
+
+---
+
 ## 1. Global UX Setup (one-time)
 
 Check whether the Claude Code UX setup is already in place:
