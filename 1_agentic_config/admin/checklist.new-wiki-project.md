@@ -20,9 +20,17 @@ Pick two values, then run each block in order. Nothing to decide.
 - `<TOPIC>` — your KB's subject, e.g. `astronomy`
 - `<OWNER>` — your GitHub username or org, e.g. `vyzed-public`
 
-**A1 · Make an empty GitHub repo.** Name it `akb-omd_<TOPIC>`. The repo must have **zero commits**, so **do not** check "Add a README," ".gitignore," or "license" — any of those creates an initial commit that collides with the framework history you push in A2. A **description**, **topics**, and the **public/private** choice are all fine — they're repo metadata, not commits.
+**A1 · Make an empty GitHub repo.** Fastest from the CLI — one command, no browser, and it creates a **zero-commit** repo (what A2 needs). *(Prereq: `gh` installed and authenticated — check with `gh auth status`.)*
 
-> **Expected, not an error:** an empty repo shows GitHub's **"Quick setup"** page instead of the normal code view — **there is no green "Code"/clone button yet, and that's correct** (nothing to clone until you push). Grab the repo URL from the HTTPS box on that page. Ignore GitHub's "We recommend every repository include a README, LICENSE, and .gitignore" nudge — the framework history you push in A2 already brings its own. The normal repo view returns right after A2's `git push`.
+```bash
+gh repo create <OWNER>/akb-omd_<TOPIC> --private --description "<your description>"
+```
+
+Use `--public` for a public repo; omit `--description` if you don't want one. Success prints `✓ Created repository … on GitHub`.
+
+**⚠ Do NOT** add a README, license, or .gitignore — the repo must have **zero commits**, or the initial commit collides with the framework history you push in A2. `gh repo create` (without `--clone`/`--source`) makes an empty repo by default, so you're fine.
+
+> **Alternative — GitHub web UI:** New repository → name it `akb-omd_<TOPIC>` → **do not** check "Add a README," ".gitignore," or "license" (any creates a colliding initial commit); description/topics/visibility are fine (metadata, not commits). An empty repo shows the **"Quick setup"** page with no green "Code" button — that's correct; grab the HTTPS URL there. The normal repo view returns after A2's `git push`.
 
 **A2 · Clone the framework into it and publish** — paste as-is, with `<TOPIC>` / `<OWNER>` substituted:
 
