@@ -28,6 +28,13 @@ gh repo create <OWNER>/akb-omd_<TOPIC> --private --description "<your descriptio
 
 Use `--public` for a public repo; omit `--description` if you don't want one. Success prints `✓ Created repository … on GitHub`.
 
+Examples :
+
+```
+gh repo create dpcunningham/akb-omd_AI-lightcone --private --description "An agentic knowledge base for a user's \"light cone\" experience of AI topic discovery"
+gh repo create dpcunningham/akb-omd_tradeNvest --private --description "An agentic knowledge base for developing trading & investing strategies"
+```
+
 **⚠ Do NOT** add a README, license, or .gitignore — the repo must have **zero commits**, or the initial commit collides with the framework history you push in A2. `gh repo create` (without `--clone`/`--source`) makes an empty repo by default, so you're fine.
 
 > **Alternative — GitHub web UI:** New repository → name it `akb-omd_<TOPIC>` → **do not** check "Add a README," ".gitignore," or "license" (any creates a colliding initial commit); description/topics/visibility are fine (metadata, not commits). An empty repo shows the **"Quick setup"** page with no green "Code" button — that's correct; grab the HTTPS URL there. The normal repo view returns after A2's `git push`.
@@ -41,11 +48,58 @@ git remote set-url origin https://github.com/<OWNER>/akb-omd_<TOPIC>.git
 git push -u origin main
 ```
 
+Examples: 
+```
+git clone https://github.com/vyzed-public/agentic-KB_OMD.git akb-omd_AI-lightcone
+git clone https://github.com/vyzed-public/agentic-KB_OMD.git akb-omd_tradeNvest
+
+cd akb-omd_AI-lightcone
+git remote set-url origin https://github.com/dpcunningham/akb-omd_AI-lightcone.git
+git push -u origin main
+
+cd ../akb-omd_tradeNvest/
+git remote set-url origin https://github.com/dpcunningham/akb-omd_tradeNvest.git
+git push -u origin main
+```
+
+
 **A3 · Wire the update link** — adds `upstream` = the framework, **fetch-only** (so your content can never be pushed into the shared framework):
 
 ```bash
 ./setup.sh --role vault --upstream https://github.com/vyzed-public/agentic-KB_OMD.git
 ```
+
+Examples :
+```
+dpc:~/.../kbs.agent-automated.wikis$ cd akb-omd_AI-lightcone/
+
+dpc:~/.../akb-omd_AI-lightcone$ # Wire an update link to add the framework as an additional upstream READ-ONLY repo (where our content can never be pushed):
+
+dpc:~/.../akb-omd_AI-lightcone$ ./setup.sh --role vault --upstream https://github.com/vyzed-public/agentic-KB_OMD.git
+vault ready: upstream -> https://github.com/vyzed-public/agentic-KB_OMD.git (push DISABLED).
+  back up your content:   git push origin main
+  pull framework fixes:   git pull upstream main
+
+dpc:~/.../akb-omd_AI-lightcone$ git remote -v
+origin	https://github.com/dpcunningham/akb-omd_AI-lightcone.git (fetch)
+origin	https://github.com/dpcunningham/akb-omd_AI-lightcone.git (push)
+upstream	https://github.com/vyzed-public/agentic-KB_OMD.git (fetch)
+upstream	DISABLED (push)
+
+dpc:~/.../akb-omd_AI-lightcone$ cd ../akb-omd_tradeNvest/
+
+dpc:~/.../akb-omd_tradeNvest$ ./setup.sh --role vault --upstream https://github.com/vyzed-public/agentic-KB_OMD.git
+vault ready: upstream -> https://github.com/vyzed-public/agentic-KB_OMD.git (push DISABLED).
+  back up your content:   git push origin main
+  pull framework fixes:   git pull upstream main
+ 
+dpc:~/.../akb-omd_tradeNvest$ git remote -v
+origin	https://github.com/dpcunningham/akb-omd_tradeNvest.git (fetch)
+origin	https://github.com/dpcunningham/akb-omd_tradeNvest.git (push)
+upstream	https://github.com/vyzed-public/agentic-KB_OMD.git (fetch)
+upstream	DISABLED (push) 
+```
+
 
 **A4 · Confirm the wiring.** Run:
 
