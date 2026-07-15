@@ -1,8 +1,8 @@
 ---
 title: Directory Structure
 created: 2026-06-22
-updated: 2026-06-25
-description: The canonical annotated directory tree for an agentic-KB_OMD vault — control/data-plane split, the four numbered directories, hidden config. AGENTS.md references this for the full tree.
+updated: 2026-07-15
+description: The canonical annotated directory tree for an agentic-KB_OMD vault — control/data-plane split, the four numbered directories, gitignored dev-vault-local scratch (_dev/, _handoff/), hidden config. AGENTS.md references this for the full tree.
 ---
 
 # Directory Structure
@@ -59,9 +59,17 @@ We also (implicitly) have:
   │
   ├── 4_collaboration/        # ACTION  ─ joint human+agent workspace (no guard)
   │
+  ├── _dev/                   # (gitignored, dev-vault-local — NOT in a fresh clone)
+  │                           #   design notes, spikes, checklists — Obsidian-visible, never shipped
+  |
+  ├── _handoff/               # (gitignored, dev-vault-local — NOT in a fresh clone)
+  │                           #   session handoff snapshots (see below)
+  │
   ├── .claude/                # (hidden) Claude Code config — commands, hooks, settings
   └── .obsidian/              # (hidden) Obsidian app config — invisible to the vault
 ```
+
+**The two underscore-prefixed directories are not part of the shipped structure.** They are **gitignored, dev-vault-local scratch** — present only in a persistent development vault, Obsidian-visible for convenience, and never committed or cloned. They sit **outside** the control/data-plane model above; a fresh clone will not have them, which is expected, not a fault. `_dev/` holds design docs, spikes, and working checklists; `_handoff/` holds cross-session handoff snapshots. **⛔ In-vault `_handoff/` is for a persistent dev vault only** — content vaults (`akb-omd_*`) get wiped and re-cloned on redeploy, so they must keep handoffs *outside* the repo per [[guide.handoff-management]].
 
 ### A Joint Workspace for User-Agent Collaboration occurs in `4_collaboration/`
 

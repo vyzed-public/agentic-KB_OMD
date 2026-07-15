@@ -68,9 +68,12 @@ Essentially:  ***"This agentic config, using a timeline, generates a wiki, for c
 2_using_timeline/   # INPUT  — data plane: source artifacts (protected; read & move, never delete)
 3_generates_wiki/   # OUTPUT — data plane: the agent-built wiki (the queryable graph)
 4_collaboration/    # ACTION — joint human+agent workspace (no guard)
+
+_dev/               # (gitignored, dev-vault-local — NOT shipped) design notes, spikes, checklists
+_handoff/           # (gitignored, dev-vault-local — NOT shipped) session handoff snapshots
 ```
 
-Details are defined in: **[[spec.directory-structure|spec.directory-structure.md]]**.
+Details are defined in: **[[spec.directory-structure|spec.directory-structure.md]]**. The two underscore-prefixed dirs are **gitignored scratch that exists only in a persistent dev vault** — they sit outside the control/data-plane model and will not be present in a fresh clone. (In-vault `_handoff/` is dev-vault-only; content vaults get wiped on redeploy, so they keep handoffs outside the repo — see [[guide.handoff-management]].)
 
 ---
 
