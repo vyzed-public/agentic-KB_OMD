@@ -73,7 +73,7 @@ _dev/               # (gitignored, dev-vault-local — NOT shipped) design notes
 _handoff/           # (gitignored, dev-vault-local — NOT shipped) session handoff snapshots
 ```
 
-Details are defined in: **[[spec.directory-structure|spec.directory-structure.md]]**. The two underscore-prefixed dirs are **gitignored scratch that exists only in a persistent dev vault** — they sit outside the control/data-plane model and will not be present in a fresh clone. (In-vault `_handoff/` is dev-vault-only; content vaults get wiped on redeploy, so they keep handoffs outside the repo — see [[guide.handoff-management]].)
+Details are defined in: **[[spec.directory-structure|spec.directory-structure.md]]**. The two underscore-prefixed dirs are **gitignored scratch that exists only in a persistent dev vault** — they sit outside the control/data-plane model and will not be present in a fresh clone (created on demand if needed). They're oriented to this persistent framework-dev vault, where development and its handoff cycle happen.
 
 ---
 

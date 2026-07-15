@@ -69,7 +69,7 @@ We also (implicitly) have:
   └── .obsidian/              # (hidden) Obsidian app config — invisible to the vault
 ```
 
-**The two underscore-prefixed directories are not part of the shipped structure.** They are **gitignored, dev-vault-local scratch** — present only in a persistent development vault, Obsidian-visible for convenience, and never committed or cloned. They sit **outside** the control/data-plane model above; a fresh clone will not have them, which is expected, not a fault. `_dev/` holds design docs, spikes, and working checklists; `_handoff/` holds cross-session handoff snapshots. **⛔ In-vault `_handoff/` is for a persistent dev vault only** — content vaults (`akb-omd_*`) get wiped and re-cloned on redeploy, so they must keep handoffs *outside* the repo per [[guide.handoff-management]].
+**The two underscore-prefixed directories are not part of the shipped structure.** They are **gitignored, dev-vault-local scratch** — present only in a persistent development vault, Obsidian-visible for convenience, and never committed or cloned. They sit **outside** the control/data-plane model above; a fresh clone will not have them, which is expected, not a fault. `_dev/` holds design docs, spikes, and working checklists; `_handoff/` holds cross-session handoff snapshots. Both are oriented to **this** persistent framework-dev vault, where development — and thus the handoff cycle — actually happens; a content vault simply won't have them unless something creates them. (A vault that is deliberately wiped and re-cloned won't retain a gitignored `_handoff/`, but that is a dev-only test-reset, not normal vault use.)
 
 ### A Joint Workspace for User-Agent Collaboration occurs in `4_collaboration/`
 
