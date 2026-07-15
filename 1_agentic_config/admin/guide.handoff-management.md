@@ -7,6 +7,8 @@ description: A user primer on handoff files — how to preserve working context 
 
 > **TL;DR** — A *handoff file* is a short, durable, hand-curated snapshot of "where we are" that you write at a clean stopping point. When a session compacts, ends, or you move to a new directory, you recover full working context by having the new session **read the handoff first** — instead of trusting a lossy automatic summary to have kept what matters.
 
+> **⚙ NOW AUTOMATED AS COMMANDS.** The operational workflow is the **`/resume`** command (load context at the start of a session) and the **`/handoff`** command (write it before you stop) — see `.claude/commands/`. Handoffs live in the gitignored `_handoff/` directory: `00_current-map.md` (the durable "read first" map) plus timestamped `YYYY-MM-DD_HH-MM.md` session bridges. **This document is kept only as background on _why_ handoffs matter; the authoritative _how_ now lives in those two command files.** Where the prompts and paths below still describe the older parent-directory (`../handoff.…`) convention, treat them as superseded by the commands.
+
 ---
 
 ## Copy-paste prompts (grab & go)

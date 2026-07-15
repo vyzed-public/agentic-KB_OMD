@@ -45,7 +45,7 @@ Before doing anything else, in order:
             "/run/user/$(id -u)/.obsidian-cli.sock" 2>/dev/null
    ```
    (per [[setup.obsidian-tooling]]). If it **still** fails, **warn the user loudly and immediately.** The blast radius is narrow: only `lint`'s authoritative graph queries (`unresolved`/`orphans`/`backlinks`) are affected — and they fall back to best-effort grep — while ingest, query, and admin/config all work without it. This is a warning, not a hard stop.
-3. **Restore context.** Read the last 10 entries of the current month's log (`1_agentic_config/logs/YYYY-MM.md`; if it's early in the month with fewer than 10 entries, also read the tail of the previous month's file). The hub note `1_agentic_config/logs/_agent_logs.md` indexes every monthly log file.
+3. **Restore context.** Read the last 10 entries of the current month's log (`1_agentic_config/logs/YYYY-MM.md`; if it's early in the month with fewer than 10 entries, also read the tail of the previous month's file). The hub note `1_agentic_config/logs/_agent_logs.md` indexes every monthly log file. For cross-session working state (as opposed to the KB log), the **`/resume`** command loads the durable handoff from `_handoff/`; write one at a clean stopping point with **`/handoff`**.
 
 ---
 
