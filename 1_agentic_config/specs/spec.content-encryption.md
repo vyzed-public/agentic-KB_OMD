@@ -56,9 +56,11 @@ git-crypt encrypts file *contents*, not *filenames or directory structure*. In t
 
 ## Key management (Tier 1) — the critical operational rule
 
-- The git-crypt **symmetric key IS your data.** An encrypted backup you cannot decrypt is worthless — so the key needs its **own** backup: store it in a password manager or an offline copy, separate from the repo.
+- The git-crypt **symmetric key IS your data.** It is generated **once** at `git-crypt init` and **cannot be regenerated**. Lose every copy — the operational one at `<vault>/.git/git-crypt/keys/default` **and** your backup — and the GitHub ciphertext is **permanently undecryptable**. No reset, no recovery.
+- The key is **binary**, so back it up **base64-encoded** in a password manager (or an offline copy), separate from the repo. **A backup you have not test-restored does not count.**
+- **→ Step-by-step, tested procedure (Bitwarden worked example): [`checklist.encryption-key-backup.md`](checklist.encryption-key-backup.md).** Export → password manager → the mandatory verify → restore, with the key never written to disk.
 - The key must **NEVER be committed** (same class as the retired MCP-key incident). It is gitignored; the framework's `build-skeleton.sh` secret gate also scans for stray keys.
-- Multi-machine: `git-crypt export-key <file>` on the first machine → copy the key file over a secure channel → `git-crypt unlock <file>` on each other machine after cloning.
+- Multi-machine / restore, no key file on disk: `git-crypt export-key /dev/stdout | base64 -w0` to back up → `printf %s '<base64>' | base64 -d | git-crypt unlock /dev/stdin` in each fresh clone.
 
 ## Operating rules
 
@@ -77,12 +79,15 @@ sudo apt-get install -y git-crypt        # or: brew install git-crypt
 
 # in a FRESH (no content yet) content vault:
 git-crypt init
-# encrypt the content paths; keep .gitattributes itself unencrypted
-printf '2_using_timeline/** filter=git-crypt diff=git-crypt\n3_generates_wiki/** filter=git-crypt diff=git-crypt\n.gitattributes !filter !diff\n' > .gitattributes
+# encrypt the content paths; keep .gitattributes AND the empty .gitkeep placeholders unencrypted.
+# (The .gitkeep line is REQUIRED: the content globs otherwise sweep in the framework's empty
+#  placeholder files, which were committed before .gitattributes, and git-crypt warns on every push.)
+printf '2_using_timeline/** filter=git-crypt diff=git-crypt\n3_generates_wiki/** filter=git-crypt diff=git-crypt\n.gitkeep !filter !diff\n.gitattributes !filter !diff\n' > .gitattributes
 git add .gitattributes && git commit -m "enable content encryption (Tier 1, git-crypt)"
 
-# back up the key OUTSIDE the repo, then store it in your password manager:
-git-crypt export-key ~/secure/<vault>.key
+# back up the key — full verified procedure: checklist.encryption-key-backup.md
+# quick form (base64 into your password manager; nothing left on disk):
+git-crypt export-key /dev/stdout | base64 -w0; echo
 ```
 
 Verify: a fresh clone *without* the key shows ciphertext under `2_using_timeline/` and `3_generates_wiki/`; after `git-crypt unlock ~/secure/<vault>.key` it shows plaintext.
