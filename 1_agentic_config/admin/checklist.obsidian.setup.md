@@ -40,3 +40,59 @@ The Obsidian Web Clipper deposits clips into the currently focused vault window.
 - **Text method (simplest):** property type **Text**, template value `{{author}}`. Emits a single plain-text string.
 
 Both do the same essential thing — **remove the `wikilink` filter**, the part that generates the brackets. The author is then captured as **data**, not a vault link. During ingest the wiki agent promotes notable authors to **entity pages**, so "what else has this author written that I've saved?" is answered by the wiki graph (entity backlinks), not by fragile links in clip frontmatter.
+
+---
+## 4. Additional Customizations
+
+Resolved w/ AI assistance
+
+
+### Enable `[Control+up/down arrow]`keys
+```
+I am working right now in Obsidian 
+and all of a sudden my control down arrow is not moving selections of text up and down like it should. 
+Did I inadvertently hit a setting to disable that key combo?
+```
+
+Yes — in Obsidian that kind of shortcut is usually being **overridden by a hotkey or plugin**, not permanently disabled. A common cause is another command being bound to the same key combo, so check **Settings → Hotkeys** and search for the exact combo to see what it’s currently assigned to.[[reddit](https://www.reddit.com/r/ObsidianMD/comments/mytydf/ctrl_shift_hot_key_to_select_multiple_words_not/)]
+
+#### What to check
+
+- Search Hotkeys for `Ctrl+Down` and `Ctrl+Shift+Down` separately, because one may have been reassigned even if the other looks fine.[[forum.obsidian](https://forum.obsidian.md/t/keyboard-shortcut-to-move-selected-rows-up-and-down/6325)]
+    
+- If you use community plugins, temporarily disable them or start in restricted mode to see whether a plugin is intercepting the arrows.[[forum.obsidian](https://forum.obsidian.md/t/up-down-arrows-dont-work-in-quick-switcher-or-command-menu-with-minimal-theme/33597)]
+    
+- Also check whether you’re in a special UI area like the command palette, quick switcher, or suggestion list, because those can handle arrow keys differently.[[forum.obsidian](https://forum.obsidian.md/t/ios-up-down-arrows-dont-work-when-selecting-blocks-to-link-with-external-keyboard/59878)]
+    
+#### Likely fix
+
+If a command is bound to that shortcut, clear the binding and restore the default text-editing behavior. If no binding shows up, a plugin or theme interaction is the more likely culprit than a setting you toggled intentionally.[[reddit](https://www.reddit.com/r/ObsidianMD/comments/mytydf/ctrl_shift_hot_key_to_select_multiple_words_not/)]
+
+---
+### Enable wide-screen horizontal span extents
+
+```
+In my obsidian session I have minimized my left and right scroll bars, 
+but my display area has not taken up the width of my very large monitor. 
+Is there a way to make it take up all the room that's available?
+```
+
+
+Yes — the setting you want is **Readable line length**. Turning it **off** lets the note body expand to the full available width of the pane in both editor and preview.[[forum.obsidian](https://forum.obsidian.md/t/fix-large-screen-visualization-for-tables-and-content/111802/2)]
+
+#### Where to change it
+
+- Go to **Settings → Editor → Readable line length**.
+    
+- Switch it **off** if you want the text area to use the full width of your monitor.[[forum.obsidian](https://forum.obsidian.md/t/how-to-get-a-lager-page-width-in-both-editing-mode-and-preview-mode/7555)]
+
+#### If it still looks narrow
+
+- A CSS snippet or theme setting may be forcing a max width even after you disable readable line length.[[lmika](https://lmika.org/2023/05/18/full-with-notes.html)]
+    
+- In that case, a snippet like `--file-line-width: 100%` or removing width limits from `.cm-sizer` can restore full-width layout.[[reddit](https://www.reddit.com/r/ObsidianMD/comments/1bpxwuc/is_there_a_way_to_make_the_text_take_the_full/)]
+    
+
+#### Extra note
+
+Minimizing sidebars helps, but it does not override the note-width setting by itself; Obsidian can still keep a readable-width column unless you disable that option.[[forum.obsidian](https://forum.obsidian.md/t/fix-large-screen-visualization-for-tables-and-content/111802/2)]
