@@ -45,7 +45,7 @@ Before doing anything else, in order:
             "/run/user/$(id -u)/.obsidian-cli.sock" 2>/dev/null
    ```
    (per [[setup.obsidian-tooling]]). If it **still** fails, **warn the user loudly and immediately.** The blast radius is narrow: only `lint`'s authoritative graph queries (`unresolved`/`orphans`/`backlinks`) are affected — and they fall back to best-effort grep — while ingest, query, and admin/config all work without it. This is a warning, not a hard stop.
-3. **Restore context.** Read the last 10 entries of the current month's log (`1_agentic_config/logs/YYYY-MM.md`; if it's early in the month with fewer than 10 entries, also read the tail of the previous month's file). The hub note `1_agentic_config/logs/_agent_logs.md` indexes every monthly log file. For cross-session working state (as opposed to the KB log), the **`/resume`** command loads the durable handoff from `_handoff/`; write one at a clean stopping point with **`/handoff`**.
+3. **Restore context.** Read the last 10 entries of the current month's log (`1_agentic_config/logs/YYYY-MM.md`; if it's early in the month with fewer than 10 entries, also read the tail of the previous month's file). The hub note `1_agentic_config/logs/_agent_logs.md` indexes every monthly log file. For cross-session working state (as opposed to the KB log), the **`/resume`** command loads the durable handoff from `_dev/`; write one at a clean stopping point with **`/handoff`**.
 
 ---
 
@@ -69,11 +69,10 @@ Essentially:  ***"This agentic config, using a timeline, generates a wiki, for c
 3_generates_wiki/   # OUTPUT — data plane: the agent-built wiki (the queryable graph)
 4_collaboration/    # ACTION — joint human+agent workspace (no guard)
 
-_dev/               # (gitignored, dev-vault-local — NOT shipped) design notes, spikes, checklists
-_handoff/           # (gitignored, dev-vault-local — NOT shipped) session handoff snapshots
+_dev/               # (gitignored, dev-vault-local — NOT shipped) design notes, spikes, checklists, + _handoff.* snapshots
 ```
 
-Details are defined in: **[[spec.directory-structure|spec.directory-structure.md]]**. The two underscore-prefixed dirs are **gitignored scratch that exists only in a persistent dev vault** — they sit outside the control/data-plane model and will not be present in a fresh clone (created on demand if needed). They're oriented to this persistent framework-dev vault, where development and its handoff cycle happen.
+Details are defined in: **[[spec.directory-structure|spec.directory-structure.md]]**. `_dev/` is **gitignored scratch that exists only in a persistent dev vault** — it sits outside the control/data-plane model and will not be present in a fresh clone (created on demand if needed). It holds design notes, spikes, checklists, and the session handoffs (`_handoff.current-map.md` + timestamped `_handoff.*` bridges), written and read by the `/handoff` and `/resume` commands.
 
 ---
 

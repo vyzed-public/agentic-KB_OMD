@@ -2,7 +2,7 @@
 title: Directory Structure
 created: 2026-06-22
 updated: 2026-07-15
-description: The canonical annotated directory tree for an agentic-KB_OMD vault — control/data-plane split, the four numbered directories, gitignored dev-vault-local scratch (_dev/, _handoff/), hidden config. AGENTS.md references this for the full tree.
+description: The canonical annotated directory tree for an agentic-KB_OMD vault — control/data-plane split, the four numbered directories, gitignored dev-vault-local scratch (_dev/, holding design docs + _handoff.* snapshots), hidden config. AGENTS.md references this for the full tree.
 ---
 
 # Directory Structure
@@ -59,17 +59,14 @@ We also (implicitly) have:
   │
   ├── 4_collaboration/        # ACTION  ─ joint human+agent workspace (no guard)
   │
-  ├── _dev/                   # (gitignored, dev-vault-local — NOT in a fresh clone)
-  │                           #   design notes, spikes, checklists — Obsidian-visible, never shipped
-  |
-  ├── _handoff/               # (gitignored, dev-vault-local — NOT in a fresh clone)
-  │                           #   session handoff snapshots (see below)
+  ├── _dev/                   # (gitignored, dev-vault-local — NOT in a fresh clone) design notes,
+  │                           #   spikes, checklists, + session handoffs (_handoff.* files) — see below
   │
   ├── .claude/                # (hidden) Claude Code config — commands, hooks, settings
   └── .obsidian/              # (hidden) Obsidian app config — invisible to the vault
 ```
 
-**The two underscore-prefixed directories are not part of the shipped structure.** They are **gitignored, dev-vault-local scratch** — present only in a persistent development vault, Obsidian-visible for convenience, and never committed or cloned. They sit **outside** the control/data-plane model above; a fresh clone will not have them, which is expected, not a fault. `_dev/` holds design docs, spikes, and working checklists; `_handoff/` holds cross-session handoff snapshots. Both are oriented to **this** persistent framework-dev vault, where development — and thus the handoff cycle — actually happens; a content vault simply won't have them unless something creates them. (A vault that is deliberately wiped and re-cloned won't retain a gitignored `_handoff/`, but that is a dev-only test-reset, not normal vault use.)
+**The `_dev/` directory is not part of the shipped structure.** It is **gitignored, dev-vault-local scratch** — present only in a persistent development vault, Obsidian-visible for convenience, and never committed or cloned. It sits **outside** the control/data-plane model above; a fresh clone will not have it, which is expected, not a fault. `_dev/` holds design docs, spikes, working checklists, and the cross-session handoffs — a durable `_handoff.current-map.md` plus timestamped `_handoff.YYYY-MM-DD_HH-MM.md` bridges, written and read by the `/handoff` and `/resume` commands. It is oriented to **this** persistent framework-dev vault, where development — and thus the handoff cycle — actually happens; a content vault simply won't have it unless the commands create it. (A vault that is deliberately wiped and re-cloned won't retain gitignored `_dev/` content, but that is a dev-only test-reset, not normal vault use.)
 
 ### A Joint Workspace for User-Agent Collaboration occurs in `4_collaboration/`
 

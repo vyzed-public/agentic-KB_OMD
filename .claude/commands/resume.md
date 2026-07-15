@@ -2,9 +2,9 @@ Resume this project from its handoff. Load prior context **before** doing any ne
 
 Steps:
 
-1. **Read the current map** — `_handoff/00_current-map.md` — in full. It is the durable "read this first" project state.
-   - If `_handoff/` or that file doesn't exist yet: during the transition also check the parent directory (`../`) for a legacy `DEV-HANDOFF.*.md`, and read that instead. If nothing is found anywhere, say so plainly and offer to start one with `/handoff` — then stop.
-2. **Survey the session bridges** — list the timestamped `_handoff/<YYYY-MM-DD_HH-MM>.md` files, newest first. Offer to read the latest (or a specific one) for point-in-time detail. Read one if the user asks, or if the current map looks stale relative to the newest bridge.
+1. **Read the current map** — `_dev/_handoff.current-map.md` — in full. It is the durable "read this first" project state.
+   - If `_dev/` or that file doesn't exist yet: during the transition also check the parent directory (`../`) for a legacy `DEV-HANDOFF.*.md`, and read that instead. If nothing is found anywhere, say so plainly and offer to start one with `/handoff` — then stop.
+2. **Survey the session bridges** — list the timestamped `_dev/_handoff.<YYYY-MM-DD_HH-MM>.md` files, newest first. Offer to read the latest (or a specific one) for point-in-time detail. Read one if the user asks, or if the current map looks stale relative to the newest bridge.
 3. **Give a status report:**
    - A 3-line status up top.
    - Then **Done** / **Next** / **Gotchas** as bullet lists — lead with the gotchas that would bite immediately.
