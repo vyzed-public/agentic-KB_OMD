@@ -24,6 +24,11 @@
 .DS_Store
 Thumbs.db
 
+# --- Dev-only scratch (planning docs, spikes, design notes, handoffs); Obsidian-visible, never shipped ---
+# Present only in a persistent dev vault; created on demand (e.g. by the /handoff command). A fresh
+# clone won't have it. Holds _handoff.current-map.md + _handoff.* bridges alongside design/spike scratch.
+_dev/
+
 # --- Optional: uncomment to reinstall plugins per-vault (checklist §3a) instead ---
 # of shipping their code in the template. Left tracked by default so a fresh
 # clone is "para-drop and go" with the MCP plugin already present.
