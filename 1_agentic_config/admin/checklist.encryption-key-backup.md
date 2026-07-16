@@ -17,12 +17,17 @@ description: Foolproof, tested checklist for backing up and restoring a Tier-1 (
 
 ## Section A — Back up the key (do ONCE, right after enabling encryption)
 
-- [ ] **A1.** In a terminal, from the vault root, print the key as one base64 line (writes nothing to disk):
+- [ ] **A1.** In a terminal, from the vault root, send the key **straight to your clipboard** as one base64 line. **Do NOT print it and select it off the screen** — terminal/rendering can inject spaces or newlines, and a single stray character makes a **dead key that silently won't decrypt.** This writes nothing to disk and nothing to the screen:
   ```bash
-  git-crypt export-key /dev/stdout | base64 -w0; echo
+  # Linux / X11:
+  git-crypt export-key /dev/stdout | base64 -w0 | xclip -selection clipboard
+  # Linux / Wayland:
+  git-crypt export-key /dev/stdout | base64 -w0 | wl-copy
+  # macOS:
+  git-crypt export-key /dev/stdout | base64 | pbcopy
   ```
-  It prints **one long line** (~200 characters for a fresh key). *(macOS: `base64` wraps differently — use `git-crypt export-key /dev/stdout | base64 | tr -d '\n'; echo`.)*
-- [ ] **A2.** Select and copy the **entire** line — no leading/trailing spaces, no line breaks. (A truncated key is a dead key.)
+  Nothing prints — that is intentional. The key is now on your clipboard, uncorrupted.
+- [ ] **A2.** Paste it directly into Bitwarden (next step) with Ctrl+V. *(If you have no clipboard tool and must eyeball it via `… | base64 -w0; echo`, know that hand-copying a base64 key off a display is the #1 cause of an unrecoverable dead backup — install `xclip`/`wl-clipboard` instead.)*
 - [ ] **A3.** In **Bitwarden** → **New item → Secure Note**:
   - **Name:** `git-crypt key — <vault>` (e.g. `git-crypt key — akb-omd_AI-lightcone`).
   - Add a **custom field**, type **Hidden**, name `key-base64`, and paste the base64 into its value (Hidden keeps it masked).
