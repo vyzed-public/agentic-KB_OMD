@@ -58,7 +58,7 @@ git-crypt encrypts file *contents*, not *filenames or directory structure*. In t
 
 - The git-crypt **symmetric key IS your data.** It is generated **once** at `git-crypt init` and **cannot be regenerated**. Lose every copy — the operational one at `<vault>/.git/git-crypt/keys/default` **and** your backup — and the GitHub ciphertext is **permanently undecryptable**. No reset, no recovery.
 - The key is **binary**, so back it up **base64-encoded** in a password manager (or an offline copy), separate from the repo. **A backup you have not test-restored does not count.**
-- **→ Step-by-step, tested procedure (Bitwarden worked example): [`checklist.encryption-key-backup.md`](checklist.encryption-key-backup.md).** Export → password manager → the mandatory verify → restore, with the key never written to disk.
+- **→ Step-by-step, tested procedure (Bitwarden worked example): [`encryption.checklist.git-crypt.key-backup.md`](encryption.checklist.git-crypt.key-backup.md).** Export → password manager → the mandatory verify → restore, with the key never written to disk.
 - The key must **NEVER be committed** (same class as the retired MCP-key incident). It is gitignored; the framework's `build-skeleton.sh` secret gate also scans for stray keys.
 - Multi-machine / restore, no key file on disk: `git-crypt export-key /dev/stdout | base64 -w0` to back up → `printf %s '<base64>' | base64 -d | git-crypt unlock /dev/stdin` in each fresh clone.
 
@@ -85,7 +85,7 @@ git-crypt init
 printf '2_using_timeline/** filter=git-crypt diff=git-crypt\n3_generates_wiki/** filter=git-crypt diff=git-crypt\n.gitkeep !filter !diff\n.gitattributes !filter !diff\n' > .gitattributes
 git add .gitattributes && git commit -m "enable content encryption (Tier 1, git-crypt)"
 
-# back up the key — full verified procedure: checklist.encryption-key-backup.md
+# back up the key — full verified procedure: encryption.checklist.git-crypt.key-backup.md
 # quick form (base64 into your password manager; nothing left on disk):
 git-crypt export-key /dev/stdout | base64 -w0; echo
 ```
