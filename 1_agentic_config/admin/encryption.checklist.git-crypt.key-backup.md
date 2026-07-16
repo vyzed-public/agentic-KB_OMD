@@ -41,6 +41,15 @@ description: Foolproof, tested checklist for backing up and restoring a Tier-1 (
 
 > A backup you have never restored is not a backup. Prove it **while you still have the original**, so a bad copy is caught when it's harmless.
 
+> **⚠ Never compare two git-crypt keys by eye — compare their fingerprints.** Every git-crypt key begins with the same fixed header (`\0GITCRYPTKEY…`) and ends in base64 `==` padding, so **any two keys look identical at the start and end** — the 256 bits that actually differ sit in the middle. Glancing at the first/last few characters will tell you two *different* keys are "the same." The only reliable check is a full hash. To confirm the value in your password manager is genuinely this vault's current key:
+> ```bash
+> # 1) fingerprint the live key (run from inside the vault):
+> git-crypt export-key /dev/stdout | base64 -w0 | sha256sum
+> # 2) fingerprint the stored copy (paste/copy the key-base64 field out of your manager first):
+> xclip -selection clipboard -o | tr -d '[:space:]' | sha256sum
+> ```
+> **The two hashes must match exactly.** If they differ, your backup is of a *different* (or corrupted) key — redo Section A. (Wayland: use `wl-paste` in place of `xclip -selection clipboard -o`.)
+
 > **⚠ THE TWO-CLIPBOARD TRAP — the "two-paste" sequence (read before you restore; this *will* bite you otherwise).** On Linux, **selecting text with the mouse** fills one clipboard (*primary*) while a password manager's **Copy button** fills another (*clipboard*). And to *run* a restore command you usually paste it — which **overwrites the clipboard with the command text, clobbering the key.** So do it in this exact order:
 > 1. **Paste the restore command** into the terminal — but **do NOT press Enter yet.**
 > 2. **Now click Copy** on the `key-base64` field in your password manager (this loads the key onto the clipboard).
