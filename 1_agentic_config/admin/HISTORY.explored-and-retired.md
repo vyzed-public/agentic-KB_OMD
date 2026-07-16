@@ -1,6 +1,6 @@
 # Development History — Explored & Retired
 
-_Why the current design looks the way it does. This doc records major approaches we **tried and abandoned** (or fundamentally changed), with the reasoning, so a future reader never mistakes a deliberate choice for naïveté. It complements the ADRs: an **ADR** records *what we decided*; this **HISTORY** records *what we explored and why we left it*._
+_Why the current design looks the way it does. This doc records major approaches we **tried and abandoned** (or fundamentally changed), with the reasoning, so a future reader never mistakes a deliberate choice for naïveté. It records *what we explored and why we left it*; the **current** architecture — and the tradeoffs we knowingly accepted — lives in the specs each entry points to._
 
 Newest entries on top. Each entry: what we tried → why we left it → what replaced it.
 
@@ -23,7 +23,7 @@ Newest entries on top. Each entry: what we tried → why we left it → what rep
 - **Attachments** → a direct fetch localizer (parse `![alt](url)` → download → rewrite to `![[local|alt]]`), which is headless, deterministic, needs no Obsidian running, and produces bash-safe filenames (the native command left literal `*` in names).
 - **Graph/link queries** (danglers, orphans, backlinks — the one genuinely valuable thing MCP did) → the **official `obsidian` CLI** (`unresolved`/`orphans`/`backlinks`), a robust terminal tool rather than a self-signed-HTTPS server.
 - **Everything else** → direct filesystem ops.
-- Net: the entire fragile MCP surface (self-signed TLS that Claude Code's native client rejects, per-vault ports, "Obsidian must be running," stale connection status, the modal) is removed. See [[ADR.mcp-removal-and-timeline-immutability|the ADR]] for the full replacement architecture.
+- Net: the entire fragile MCP surface (self-signed TLS that Claude Code's native client rejects, per-vault ports, "Obsidian must be running," stale connection status, the modal) is removed. Full replacement architecture in the living specs: [[spec.file-ingestion]] (the localizer + name-preserving filing), [[setup.obsidian-tooling]] (the `obsidian` CLI), and [[spec.timeline-guard-hook]] (the location-based guard).
 
 **Related fragility we won't miss** (all encountered during the MCP period, 2026-Q2→Q3): a TLS regression where Claude Code's native binary began rejecting the plugin's self-signed cert (masked for weeks because `curl -k` skips the exact check Claude enforces); mandatory unique `insecurePort` per vault; and MCP tools loading only at session start.
 
@@ -35,7 +35,7 @@ Newest entries on top. Each entry: what we tried → why we left it → what rep
 
 **Why we left it.** Content-diffing is the wrong axis. The moment we went direct-filesystem (post-MCP), the agent needed to write CTN bodies during ingest, and negotiating that through content carve-outs got complex and fragile.
 
-**What replaced it.** **Location-based immutability**: a CTN is a **staged CTN** (top-level `2_using_timeline/*`, freely agent-editable — stamp + localize happen here) until the one-way **filing** move into `2_using_timeline/YYYY/MM/[assets/]` **seals** it into a **filed CTN**, which is **agent-immutable**. The guard becomes a simple path check (no content diffing); the frontmatter *and* image-localization carve-outs both disappear. Deletion stays curator-only everywhere. (Spaced-review `due_at:` churn on filed CTNs is the Repeat plugin writing via Obsidian internals — orthogonal to the agent, so the guard neither sees nor blocks it; "agent-immutable" is the precise claim.) See [[ADR.mcp-removal-and-timeline-immutability|the ADR]].
+**What replaced it.** **Location-based immutability**: a CTN is a **staged CTN** (top-level `2_using_timeline/*`, freely agent-editable — stamp + localize happen here) until the one-way **filing** move into `2_using_timeline/YYYY/MM/[assets/]` **seals** it into a **filed CTN**, which is **agent-immutable**. The guard becomes a simple path check (no content diffing); the frontmatter *and* image-localization carve-outs both disappear. Deletion stays curator-only everywhere. (Spaced-review `due_at:` churn on filed CTNs is the Repeat plugin writing via Obsidian internals — orthogonal to the agent, so the guard neither sees nor blocks it; "agent-immutable" is the precise claim.) Full model + accepted tradeoffs: [[spec.timeline-guard-hook]].
 
 ---
 
