@@ -41,10 +41,15 @@ description: Foolproof, tested checklist for backing up and restoring a Tier-1 (
 
 > A backup you have never restored is not a backup. Prove it **while you still have the original**, so a bad copy is caught when it's harmless.
 
-> **⚠ THE TWO-CLIPBOARD TRAP — read before you restore (this *will* bite you otherwise).** On Linux, **selecting text with the mouse** fills one clipboard (*primary*) while a password manager's **Copy button** fills another (*clipboard*). And to *run* a restore command you usually paste it — which **overwrites the clipboard with the command text, clobbering the key.** So do it in this exact order:
+> **⚠ THE TWO-CLIPBOARD TRAP — the "two-paste" sequence (read before you restore; this *will* bite you otherwise).** On Linux, **selecting text with the mouse** fills one clipboard (*primary*) while a password manager's **Copy button** fills another (*clipboard*). And to *run* a restore command you usually paste it — which **overwrites the clipboard with the command text, clobbering the key.** So do it in this exact order:
 > 1. **Paste the restore command** into the terminal — but **do NOT press Enter yet.**
 > 2. **Now click Copy** on the `key-base64` field in your password manager (this loads the key onto the clipboard).
 > 3. **Press Enter.** The command reads the clipboard, which now holds the key.
+>
+> The command to paste in step 1 (run this from *inside* the vault directory — no `cd` needed):
+> ```bash
+> xclip -selection clipboard -o | base64 -d | git-crypt unlock /dev/stdin
+> ```
 >
 > Symptoms of getting the order wrong: `base64: invalid input` or `not a valid git-crypt key file` — it means the clipboard held command text (or stale junk), not the key, when the command ran. Redo the three steps. *(Sanity check any time: `xclip -selection clipboard -o | tr -d '[:space:]' | wc -c` should be ~200, not tiny.)*
 
