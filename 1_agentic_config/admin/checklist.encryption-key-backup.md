@@ -41,12 +41,20 @@ description: Foolproof, tested checklist for backing up and restoring a Tier-1 (
 
 > A backup you have never restored is not a backup. Prove it **while you still have the original**, so a bad copy is caught when it's harmless.
 
+> **⚠ THE TWO-CLIPBOARD TRAP — read before you restore (this *will* bite you otherwise).** On Linux, **selecting text with the mouse** fills one clipboard (*primary*) while a password manager's **Copy button** fills another (*clipboard*). And to *run* a restore command you usually paste it — which **overwrites the clipboard with the command text, clobbering the key.** So do it in this exact order:
+> 1. **Paste the restore command** into the terminal — but **do NOT press Enter yet.**
+> 2. **Now click Copy** on the `key-base64` field in your password manager (this loads the key onto the clipboard).
+> 3. **Press Enter.** The command reads the clipboard, which now holds the key.
+>
+> Symptoms of getting the order wrong: `base64: invalid input` or `not a valid git-crypt key file` — it means the clipboard held command text (or stale junk), not the key, when the command ran. Redo the three steps. *(Sanity check any time: `xclip -selection clipboard -o | tr -d '[:space:]' | wc -c` should be ~200, not tiny.)*
+
 - [ ] **B1.** Clone the repo into a throwaway dir: `git clone <repo-url> /tmp/keytest`
 - [ ] **B2.** Copy the `key-base64` value back **out** of Bitwarden.
-- [ ] **B3.** Restore it **without writing the key to disk** (paste your base64 where shown):
+- [ ] **B3.** Restore it **without writing the key to disk**, using the three-step clipboard order above (paste command → copy key in Bitwarden → Enter):
   ```bash
-  printf %s 'PASTE_BASE64_HERE' | base64 -d | ( cd /tmp/keytest && git-crypt unlock /dev/stdin )
+  xclip -selection clipboard -o | base64 -d | ( cd /tmp/keytest && git-crypt unlock /dev/stdin )
   ```
+  *(Wayland: swap `xclip -selection clipboard -o` for `wl-paste`. No clipboard tool, or the trick won't cooperate? Paste the key straight into the command instead: `printf %s 'PASTE_BASE64_HERE' | base64 -d | ( cd /tmp/keytest && git-crypt unlock /dev/stdin )`.)*
 - [ ] **B4.** Confirm a known file is now **plaintext** — open one in `2_using_timeline/`, or:
   ```bash
   grep -rl . /tmp/keytest/2_using_timeline | head
@@ -59,10 +67,11 @@ description: Foolproof, tested checklist for backing up and restoring a Tier-1 (
 
 - [ ] **C1.** Clone the repo: `git clone <repo-url> <vault>`
 - [ ] **C2.** Get the `key-base64` from Bitwarden.
-- [ ] **C3.** Unlock (no key file on disk):
+- [ ] **C3.** Unlock (no key file on disk), using the **three-step clipboard order** from Section B (paste command → copy key in Bitwarden → Enter):
   ```bash
-  printf %s 'PASTE_BASE64_HERE' | base64 -d | ( cd <vault> && git-crypt unlock /dev/stdin )
+  xclip -selection clipboard -o | base64 -d | ( cd <vault> && git-crypt unlock /dev/stdin )
   ```
+  *(Fallback — paste the key into the command directly: `printf %s 'PASTE_BASE64_HERE' | base64 -d | ( cd <vault> && git-crypt unlock /dev/stdin )`.)*
 - [ ] **C4.** The working tree is now plaintext. Open in Obsidian normally.
 
 ---
