@@ -22,4 +22,4 @@ Steps:
 
 ---
 
-**Why this is a command, not just guidance:** the operational workflow (where handoffs live, the filename format, overwrite-vs-append) is pinned *here*, in one executable place, instead of narrated in a doc we hope reflects our intent. Start a session with the companion `/resume`. Conceptual background — *why* handoffs beat lossy auto-compaction — lives in `1_agentic_config/admin/guide.handoff-management.md`.
+**Why this is a command, not just guidance:** the operational workflow (where handoffs live, the filename format, overwrite-vs-append) is pinned *here*, in one executable place, instead of narrated in a doc we hope reflects our intent. Start a session with the companion `/resume`. Conceptual background — *why* a curated durable snapshot beats lossy auto-compaction — is the same lossy-by-design principle in `1_agentic_config/admin/mission.rescue-the-curator.md`.

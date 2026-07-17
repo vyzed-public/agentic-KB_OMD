@@ -14,4 +14,4 @@ This pairs with — it does not replace — the session-startup checks in `AGENT
 
 ---
 
-**Why this is a command:** it makes "load the durable context first" a single keystroke and a deterministic procedure, rather than something we remember to do. Write the counterpart with `/handoff` at the end of a session. Background on the approach: `1_agentic_config/admin/guide.handoff-management.md`.
+**Why this is a command:** it makes "load the durable context first" a single keystroke and a deterministic procedure, rather than something we remember to do. Write the counterpart with `/handoff` at the end of a session. Background on the approach — the lossy-summary-vs-durable-original principle — lives in `1_agentic_config/admin/mission.rescue-the-curator.md`.

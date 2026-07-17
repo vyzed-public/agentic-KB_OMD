@@ -7,7 +7,7 @@ description: Spec for setting up a rich statusline, done-signal + "needs-you" de
 
 # Claude Code UX Setup
 
-> **Related:** [[guide.handoff-management]] — a companion primer on preserving working context across compaction and sessions. This doc tunes the *environment*; that one tunes the *workflow*.
+> **Related:** the **`/handoff`** and **`/resume`** commands (`.claude/commands/`) — they preserve working context across compaction and sessions. This doc tunes the *environment*; those tune the *workflow*.
 
 This is an instruction file for an LLM agent (e.g. Claude Code). Its job is to set up these UX improvements in `~/.claude/`:
 

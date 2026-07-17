@@ -9,4 +9,4 @@ Don't hand-copy files or fork on GitHub — the checklist's §0 has the supporte
 
 ## Session continuity
 
-Resume work with **`/resume`** — it loads the durable handoff and gives a status report before anything new starts. Snapshot the session with **`/handoff`** before you stop. Handoffs live in the gitignored `_dev/` directory (a durable `_handoff.current-map.md` plus timestamped `_handoff.*` bridges). Background: **[`1_agentic_config/admin/guide.handoff-management.md`](1_agentic_config/admin/guide.handoff-management.md)**.
+Resume work with **`/resume`** — it loads the durable handoff and gives a status report before anything new starts. Snapshot the session with **`/handoff`** before you stop. Handoffs live in the gitignored `_dev/` directory (a durable `_handoff.current-map.md` plus timestamped `_handoff.*` bridges).
