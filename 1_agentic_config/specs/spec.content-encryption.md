@@ -39,7 +39,7 @@ A private repo stops anonymous public browsing. Encryption additionally defends 
 |---|---|---|---|---|---|---|
 | **0 — Private only** | GitHub-private repo — **no extra binary** | nothing at rest | **No** | none | none | Most vaults; content not especially sensitive |
 | **1 — Content-encrypted** | **git-crypt** (symmetric key) on `content-paths` — **1 extra binary** | note **bodies + images** | **⚠ No** — titles/dates/entity names still visible | one-time/vault: install `git-crypt` + `init` + `.gitattributes` + back up key | **~none** — working tree stays plaintext for Obsidian + Claude; GitHub still browsable | Sensitive *contents*, non-sensitive *titles* |
-| **2 — Fully opaque** | **git-remote-gcrypt** — **1 extra binary + GPG** | **everything** — contents + **filenames** + history | **Yes** | one-time/vault: install `git-remote-gcrypt` + `gnupg` + set `gcrypt::` remote + passphrase — *comparable to Tier 1, marginally heavier (GPG)* | **~none for daily editing** (working tree still plaintext); real cost is GitHub-side: **no web view / PR / diff / Actions** + heavier sync | Vaults where the *titles themselves* are the secret |
+| **2 — Fully opaque** | **git-remote-gcrypt** — **1 extra binary + GPG** | **everything** — contents + **filenames** + history | **Yes** | one-time/vault: install `git-remote-gcrypt` + `gnupg`, **generate a never-expiring GPG key**, set the `gcrypt::` remote, **back up key *and* passphrase** — *marginally heavier than Tier 1 (the GPG key step)* | **~none for daily editing** (working tree still plaintext); real cost is GitHub-side: **no web view / PR / diff / Actions** + heavier sync | Vaults where the *titles themselves* are the secret |
 
 **Default = Tier 1.** It covers the common case at near-zero cost and stays transparent to the agent and Obsidian (they only ever see the decrypted working tree). Framework files stay plaintext, so `git pull upstream` remains clean.
 
@@ -61,6 +61,17 @@ git-crypt encrypts file *contents*, not *filenames or directory structure*. In t
 - **→ Step-by-step, tested procedure (Bitwarden worked example): [`encryption.checklist.git-crypt.key-backup.md`](encryption.checklist.git-crypt.key-backup.md).** Export → password manager → the mandatory verify → restore, with the key never written to disk.
 - The key must **NEVER be committed** (same class as the retired MCP-key incident). It is gitignored; the framework's `build-skeleton.sh` secret gate also scans for stray keys.
 - Multi-machine / restore, no key file on disk: `git-crypt export-key /dev/stdout | base64 -w0` to back up → `printf %s '<base64>' | base64 -d | git-crypt unlock /dev/stdin` in each fresh clone.
+
+## Key management (Tier 2) — TWO secrets, and no symmetric shortcut
+
+_Validated by the Tier-2 spike (run-1, 2026-07-16)._
+
+- **git-remote-gcrypt always encrypts to a GPG key — there is NO keyless / passphrase-only "symmetric" mode.** The manpage is explicit: *"You need a personal GPG key."* Leaving `gcrypt-participants` **unset** — equivalently the literal value `simple` — means *"encrypt to your own default key"* (single-recipient; the solo-vault default). Setting it to a space-separated list of **fingerprints** grants multi-recipient access.
+- **Custody is TWO secrets, useless apart: the GPG secret key AND its passphrase.** Lose either and the GitHub blob is **permanently undecryptable**. (Do not reason about it like an SSH key — an SSH key only authenticates and is freely regenerable; this one *decrypts your data*.)
+- **Back the key up BASE64-encoded** — `gpg --export-secret-keys <FPR> | base64 -w0` — **not** as a raw `--armor` block. Password-manager fields are HTML form controls (Electron/Chromium); a single-line field **strips the newlines** out of armor, silently producing a **dead backup** that `gpg --import` later rejects (*"no valid OpenPGP data found"*). base64 `-w0` is one line with nothing to mangle. **Tested — this exact corruption bit us in the spike and was caught only by the verify step.**
+- **Generate with no expiry** (`gpg --quick-generate-key "<name> <email>" default default never`) — this is a *data-at-rest* key; an expired key still decrypts old data but blocks new pushes and throws warnings.
+- **→ Step-by-step, tested procedure: [`encryption.checklist.GPG-gcrypt.key-backup.md`](encryption.checklist.GPG-gcrypt.key-backup.md).** Back up → the mandatory fingerprint verify → restore in a clean `GNUPGHOME`.
+- **Operational gotchas:** the first gcrypt push is implicitly a `--force` (set `gcrypt-require-explicit-force-push` on shared vaults); a **fresh gcrypt clone leaves an EMPTY working tree** (`remote HEAD refers to nonexistent ref`) until you run **`git checkout main`**; pinentry is **modal**, so copy the passphrase to your clipboard *before* running any gpg step.
 
 ## Operating rules
 
