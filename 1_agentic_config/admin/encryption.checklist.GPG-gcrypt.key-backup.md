@@ -50,6 +50,9 @@ gpg --export-secret-keys <FINGERPRINT> | base64 -w0
 #     → one long single line. Store THIS in Bitwarden's Notes body.
 # 3b. Passphrase — store separately (a Hidden custom field is fine).
 ```
+
+> **👁 What you'll see when you paste — and why it's SUPPOSED to look wrong.** What you paste into Bitwarden will **NOT** look like a readable key. Expect a single unbroken line of gibberish (letters, digits, `+`, `/`, maybe a trailing `=`) — no `-----BEGIN…-----` header, no line breaks, nothing legible. **That is correct.** A "readable, clearly a key" format is exactly the *problem* for an Electron-based app like Bitwarden: the nice multi-line `-----BEGIN PGP PRIVATE KEY BLOCK-----` version *looks* trustworthy precisely because it is structured and legible — but that structure is multiple lines, and Bitwarden's Notes field **silently strips the newlines**, collapsing it to one space-joined blob. On restore, `gpg --import` rejects that with *"no valid OpenPGP data found."* The unreadable base64 line is the **safe** one — it has no newlines for the field to mangle. (Don't trust either format on faith: the **Verify the backup** step below *proves* the restore by fingerprint.)
+
 Restore later with:
 ```bash
 # copy the base64 string out of your manager, then:
@@ -60,10 +63,27 @@ base64 -d | gpg --import          # or: pbpaste / xclip -o | base64 -d | gpg --i
 
 **Verify the backup — do NOT skip (this is the step that catches the corruption above):**
 - **Fingerprint-match** the restored key: `gpg --fingerprint <FINGERPRINT>` — compare to the original. Never eyeball the key blob (they all look alike).
-- **Prove a full restore in a clean `GNUPGHOME`** (`export GNUPGHOME=$(mktemp -d)`) so a cached `gpg-agent` passphrase can't fake a pass: `base64 -d | gpg --import` the stored copy, then confirm the fingerprint and (ideally) an actual `git clone gcrypt::…` decrypt.
+- **Prove a full restore in a clean `GNUPGHOME`** (`export GNUPGHOME=$(mktemp -d)`) so a cached `gpg-agent` passphrase can't fake a pass: import the stored copy, confirm the fingerprint, and (ideally) do an actual `git clone gcrypt::…` decrypt.
+- 🔴 **STAGE the key to a file before importing — do NOT pipe it straight from the clipboard.** The clipboard holds **one** thing, but a secret-key import needs the key **and then** its passphrase in sequence: `gpg --import` of a secret key pops a **modal pinentry** for the passphrase, and the modal grabs focus so you can't return to the manager to fetch it. If the key is on the clipboard, there's no room for the passphrase. Instead:
+  ```bash
+  # 1. paste base64 from the manager into a file (frees the clipboard):
+  <paste>  > /tmp/key.b64          # e.g. xclip -selection clipboard -o > /tmp/key.b64
+  base64 -d /tmp/key.b64 | wc -c   # sanity: > 0 bytes
+  # 2. now copy the PASSPHRASE from the manager to the clipboard.
+  # 3. import from the FILE; paste the passphrase (Ctrl+V) into the modal pinentry:
+  base64 -d /tmp/key.b64 | gpg --import
+  # 4. confirm, then shred:
+  gpg --list-secret-keys --with-colons | grep '^fpr'   # == your fingerprint
+  shred -u /tmp/key.b64
+  ```
 
 > **📋 Storing the secrets in your password manager — practical gotchas (Bitwarden, tested):**
 > - **The base64 key is too big for a custom field** (~5 KB > Bitwarden's **5000-char custom-field cap** — you'll get *"The field Value exceeds the maximum encrypted value length of 5000 characters."*). Put the base64 string in the note's main **Notes body** (~10,000-char limit). A file **attachment** (the `.asc`/base64 as a file) also preserves it exactly, but needs Bitwarden premium.
 > - **Passphrase → a *Hidden* custom field.** "Hidden" masks only the *value*; the field **label stays visible** and keeps a **copy button**, so you can see it's there and copy it without revealing it. Masked is the correct treatment for a secret.
 > - **Both secrets are required and useless apart** — the passphrase unlocks nothing without the key material, and vice-versa. For defense-in-depth you may split them into **two separate notes**; one note with the passphrase field + base64-key-in-Notes is also fine.
-> - **Modal pinentry:** the passphrase dialog grabs focus, so you can't switch to your manager once it's up. **Copy the passphrase to your clipboard BEFORE running any gpg step**, then paste it into the dialog.
+> - **Modal pinentry + the single clipboard — THE GOLDEN RULE: the passphrase must be the LAST thing you copy before the dialog appears.** The pinentry dialog grabs focus, so once it's up you cannot switch back to your manager to fetch the passphrase — it has to already be on the clipboard. But the clipboard holds only one thing, so *anything else that needs the clipboard must happen first*:
+>   1. **Stage the command / key first.** Paste the git or gpg command into your terminal but **do NOT press enter yet** (and if you're importing a key, stage the base64 to a file per the 🔴 note above). This consumes the clipboard now, while you still can.
+>   2. **Copy the passphrase** from your manager — now it's the last thing on the clipboard.
+>   3. **Press enter** to run the command.
+>   4. **Paste the passphrase** (Ctrl+V) into the modal when it pops.
+>   Get this order wrong — copy the passphrase, then copy the command to paste it — and the command-copy silently clobbers the passphrase off the clipboard, and you're stuck at a modal you can't fill.
