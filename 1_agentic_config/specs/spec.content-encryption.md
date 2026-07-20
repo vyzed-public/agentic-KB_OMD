@@ -119,6 +119,49 @@ git-crypt export-key /dev/stdout | base64 -w0; echo
 
 Verify end-to-end: a fresh clone *without* the key shows ciphertext under `2_using_timeline/` and `3_generates_wiki/` — **including `wiki.index.md`** (grep it for a known page name; it must not appear); after `git-crypt unlock <key>` it shows plaintext. **If `wiki.index.md` is still readable in a keyless clone, the `git-crypt status -f` re-encryption step was missed** — the single easiest Tier-1 mistake to make.
 
+## Enable Tier 2 manually (until `enable-encryption.sh` ships)
+
+> Tier 2 wraps the **remote** in git-remote-gcrypt: the whole push becomes one opaque blob (contents **+ filenames + history**). No `.gitattributes`, no per-file handling — encryption is wholesale at push time. It **requires a GPG key** (Tier 2 has no keyless/symmetric mode — see "Key management (Tier 2)" above); generate + back it up per `encryption.checklist.GPG-gcrypt.key-backup.md`, or reuse an existing solo key.
+
+**⚠ STEP ZERO — the remote MUST be free of plaintext history, or Tier 2 silently fails.** gcrypt stores its encrypted data under the remote's **`master`** ref (its internal convention) and does **not** touch any pre-existing branch. Our own deploy flow (`checklist.new-wiki-project.md`) pushes the framework scaffold **plaintext** at setup — so a *deployed* vault's GitHub repo already has a plaintext `main`. Enable gcrypt on top and that plaintext `main` **remains**, `HEAD` still points at it, and a plain `git clone` serves the **plaintext tree — filenames and all** — defeating the entire point of Tier 2. **Delete and recreate the GitHub repo before the first gcrypt push:**
+```bash
+gh repo delete <owner>/<REPO> --confirm         # gh 2.4.0 → --confirm (NOT --yes)
+gh repo create <owner>/<REPO> --private
+git config --unset remote.origin.gcrypt-id      # only if a prior gcrypt push already set it
+```
+*(Here the leaked plaintext was only framework files, but for a vault whose filenames are the secret this step is mandatory. TESTED: skipping it left a plaintext `main` beside gcrypt's `master` on a real vault; the plain-clone opacity check caught it.)*
+
+```bash
+# per-machine, one-time: install the binaries
+sudo apt-get install -y git-remote-gcrypt gnupg
+
+# in a content vault with NO real content yet AND a plaintext-free remote (Step Zero):
+# point origin at the gcrypt remote. Solo vault → leave gcrypt-participants UNSET
+# (unset ≡ "simple" ≡ encrypt to your own default key; single-recipient).
+git remote set-url origin gcrypt::https://github.com/<owner>/<REPO>.git
+
+# first (encrypted) push — pops a MODAL pinentry for the GPG passphrase
+git push origin main
+```
+PASS on the push: `Setting up new repository`, `Remote ID is …`, `Encrypting to: --throw-keyids --default-recipient-self`, `[new branch] main` (plus an implicit-`--force` note).
+
+Verify (BOTH must pass):
+```bash
+D=$(mktemp -d)
+# opacity — a PLAIN clone must be only opaque hash-named blobs (no filenames, no plaintext):
+git clone https://github.com/<owner>/<REPO>.git "$D/raw"
+find "$D/raw" -not -path '*/.git/*' -type f          # → 2 opaque blobs (manifest + pack), nothing else
+git ls-remote https://github.com/<owner>/<REPO>.git  # → ONLY refs/heads/master (NO plaintext main)
+# round-trip — a gcrypt clone must decrypt back to plaintext:
+git clone gcrypt::https://github.com/<owner>/<REPO>.git "$D/unlocked"
+git -C "$D/unlocked" checkout main                    # REQUIRED — fresh gcrypt clone lands on an empty tree
+```
+
+**Gotchas** (all bit us for real):
+- **Modal pinentry** — copy the passphrase to your clipboard BEFORE running the push/clone (it grabs focus). An agent driving the command cannot see or fill the dialog; the human must.
+- **Fresh gcrypt clone = empty working tree** (`remote HEAD refers to nonexistent ref`) → always `git checkout main`.
+- **First gcrypt push is implicitly `--force`** → for a shared vault set `git config remote.origin.gcrypt-require-explicit-force-push true`.
+
 ## See also
 - `checklist.new-wiki-project.md` §0.5 — the deploy-time tier decision.
 - `DESIGN.content-vault-encryption.md` (dev, not shipped) — full rationale, the 5 hard problems, the open Tier-2 decision, and the spike/test plan.
