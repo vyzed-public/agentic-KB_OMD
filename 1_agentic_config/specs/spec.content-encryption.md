@@ -1,7 +1,7 @@
 ---
 title: Content-Vault Encryption
 created: 2026-07-09
-updated: 2026-07-09
+updated: 2026-07-19
 status: PLANNED — the three-tier model is decided; the enabling tooling (enable-encryption.sh) is NOT yet shipped. Tier 1 can be enabled manually today (see "Enable Tier 1 manually" below).
 description: Optional at-rest encryption for a CONTENT vault's notes, so they are opaque in the vault's own GitHub origin. Three privacy tiers chosen per-vault at deploy time. The framework repo is NEVER encrypted.
 ---
@@ -82,26 +82,42 @@ _Validated by the Tier-2 spike (run-1, 2026-07-16)._
 
 ## Enable Tier 1 manually (until `enable-encryption.sh` ships)
 
-> These are the interim manual steps; the future `enable-encryption.sh` will generate `.gitattributes` from `content-paths`, run `git-crypt init`, and gitignore the key automatically.
+> These are the interim manual steps; the future `enable-encryption.sh` will generate `.gitattributes` from `content-paths`, run `git-crypt init`, **re-encrypt any pre-existing content-path files**, and gitignore the key automatically.
 
 ```bash
 # per-machine, one-time: install the binary
 sudo apt-get install -y git-crypt        # or: brew install git-crypt
 
-# in a FRESH (no content yet) content vault:
+# in a content vault with NO real content yet (before the first content commit):
 git-crypt init
-# encrypt the content paths; keep .gitattributes AND the empty .gitkeep placeholders unencrypted.
-# (The .gitkeep line is REQUIRED: the content globs otherwise sweep in the framework's empty
-#  placeholder files, which were committed before .gitattributes, and git-crypt warns on every push.)
+
+# Write .gitattributes: encrypt the content paths, but keep TWO classes of file plaintext —
+#   - .gitattributes itself (git-crypt has to read it), and
+#   - the empty .gitkeep placeholders the framework ships in the content dirs (they hold nothing,
+#     and being committed before .gitattributes they would otherwise make git-crypt warn on every push).
 printf '2_using_timeline/** filter=git-crypt diff=git-crypt\n3_generates_wiki/** filter=git-crypt diff=git-crypt\n.gitkeep !filter !diff\n.gitattributes !filter !diff\n' > .gitattributes
-git add .gitattributes && git commit -m "enable content encryption (Tier 1, git-crypt)"
+git add .gitattributes
+
+# ⚠ RE-ENCRYPT PRE-EXISTING CONTENT-PATH FILES — do NOT skip this step.
+# git-crypt only encrypts files as they are staged AFTER .gitattributes exists; it does NOT
+# retroactively encrypt what was already committed plaintext. The framework ships one such file
+# inside a content path: 3_generates_wiki/wiki.index.md (the wiki catalog — it lists every
+# source/concept/entity page name, so it SHOULD be encrypted, unlike the exempted .gitkeep).
+# Writing .gitattributes alone leaves it PLAINTEXT on the remote. Re-stage every should-be-encrypted
+# file through git-crypt's clean filter:
+git-crypt status -f          # re-stages wiki.index.md (and any other pre-existing content-path file)
+
+git commit -m "enable content encryption (Tier 1, git-crypt)"
+
+# CONFIRM before pushing — wiki.index.md must be listed as *encrypted*, not "not encrypted":
+git-crypt status 3_generates_wiki/wiki.index.md
 
 # back up the key — full verified procedure: encryption.checklist.git-crypt.key-backup.md
 # quick form (base64 into your password manager; nothing left on disk):
 git-crypt export-key /dev/stdout | base64 -w0; echo
 ```
 
-Verify: a fresh clone *without* the key shows ciphertext under `2_using_timeline/` and `3_generates_wiki/`; after `git-crypt unlock ~/secure/<vault>.key` it shows plaintext.
+Verify end-to-end: a fresh clone *without* the key shows ciphertext under `2_using_timeline/` and `3_generates_wiki/` — **including `wiki.index.md`** (grep it for a known page name; it must not appear); after `git-crypt unlock <key>` it shows plaintext. **If `wiki.index.md` is still readable in a keyless clone, the `git-crypt status -f` re-encryption step was missed** — the single easiest Tier-1 mistake to make.
 
 ## See also
 - `checklist.new-wiki-project.md` §0.5 — the deploy-time tier decision.
