@@ -41,6 +41,7 @@ In this KG, the NOTES implement a descending ladder of discovery, as follows:
 		- High INTERNAL connectivity within the KG
 			- to other GWNs via multiple wikilinks
 		- 4 types: concepts, entities, sources, and synthesis
+			- **Projects are entities, not a fifth type.** A `project_<slug>` page (from a CTN's `projects:` property) is an **entity** GWN in `entities/` — the `project_` prefix is a naming convention only.
 		- Note that GWNs in "sources/"  have wikilinks to ingested CTNs
 		- In our KB, GWNs point OUT at other notes
 			- versus CTNs, which get pointed "to", by GWNs in `sources/`
@@ -69,7 +70,7 @@ UNDERSTAND that the GWNs are SUMMARIES — deliberately intended to be VERY LOSS
 ### You should explore unexpected CYCLES from GWNs to CTNs back to GWNs
 
 UNDERSTAND that details in the CTNs may yield ADDITIONAL IDEAS for exploring the KG:
--  The `purpose:` and `projects:` properties of the CTNs may map to GWNs.
+-  The `purpose:` and `projects:` properties of the CTNs may map to GWNs. A `projects:` entry maps to an **entity** GWN — the `project_<slug>` page in `entities/` (projects are entities, not a separate type).
 - Concepts in the CTNs can be searched in the GWNs and re-traversed in the KG
 - There could be MULTIPLE CYCLES 
 	- between the details in the CTNs 
