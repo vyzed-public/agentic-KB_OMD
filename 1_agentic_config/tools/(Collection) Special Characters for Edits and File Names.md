@@ -51,9 +51,9 @@ Other good choices depending on nuance:
 - **⛵💨** — sailing fast / heading out with the wind
     
 For a UI label or an Obsidian section, I’d use:
-- `🔍 Explore` for discovering/searching content
-- `🧭 Explore` for browsing a broader space or guided discovery
-- `🗺️ Explore` for navigating a map, roadmap, or knowledge base
+- 🔍 Explore  for discovering/searching content
+- 🧭  Explore  for browsing a broader space or guided discovery
+- 🗺️  Explore  for navigating a map, roadmap, or knowledge base
 
 -  🚀    Rocket
 -   🛰️   Satellite
