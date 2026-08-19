@@ -54,3 +54,12 @@ For a UI label or an Obsidian section, I’d use:
 - `🔍 Explore` for discovering/searching content
 - `🧭 Explore` for browsing a broader space or guided discovery
 - `🗺️ Explore` for navigating a map, roadmap, or knowledge base
+
+-  🚀    Rocket
+-   🛰️   Satellite
+-  🛸    Flying saucer / UFO
+-  👾    Alien monster / retro space-invader 
+-   🌍   🌎   🌏    Earth globes
+-   🌐   Globe with meridians / world-network
+-  🪐    Ringed planet
+-  ⭐   🌟   ✨     Star, glowing star, sparkles
