@@ -1,6 +1,6 @@
 # agentic-KB_OMD
 An agentic knowledge base in Obsidian-flavored markdown.
-## Purpose: [[mission.rescue-the-curator|Solving the Combinatoric Explosion of Knowledge Base Curation]]
+## Purpose: [Solving the Combinatoric Explosion of Knowledge Base Curation](1_agentic_config/admin/mission.rescue-the-curator.md)
 
 The problem with every previous generation of knowledge management tools is that they made the same fatal demand: **a human curator must wire the network at collection time.**  That demand imposes **exponentially increasing friction as the number of notes grows.** The combinatoric explosion of possible connections outruns the human's capacity to maintain them.  Agentic AI lets us separate knowledge *collection* from knowledge graph *networking*.
 ## Start here
