@@ -5,9 +5,9 @@ A  [Karpathy-inspired](1_agentic_config/specs/pattern.karpathy-llm-wiki.md) know
 
 The problem with every previous generation of knowledge management tools is that they made the same fatal demand: **a human curator must wire the network at collection time.**  That demand imposes **exponentially increasing friction as the number of notes grows.** 
 
-The combinatoric explosion of possible connections outruns the human's capacity to maintain them.  This is... stressful.
+The combinatoric explosion of possible connections simply outruns any human's capacity to keep up.  This is... stressful.
 
-Agentic AI lets us separate knowledge *collection* from knowledge graph *networking*.  This is... quite useful.
+Agentic AI lets us separate knowledge *collection* from knowledge graph *networking*.  This is... a useful relief.
 ## Start here
 
 New knowledge base? Follow **[`1_agentic_config/admin/checklist.new-wiki-project.md`](1_agentic_config/admin/checklist.new-wiki-project.md)** top to bottom — it's the single entry point and routes you to every other doc (git setup, Obsidian tooling, daily notes, bootstrapping the wiki) when you need them.
