@@ -20,7 +20,7 @@
 - arrows:   ⇒    ⤇    →
 - `confused` → 😕  😵‍💫  🤨
 
-**Emojis for Explorations:**
+## Emojis for Explorations:
 
 🔍   is usually the best single emoji for “explore”: it conveys searching, discovering, and investigating.
 
@@ -63,3 +63,95 @@ For a UI label or an Obsidian section, I’d use:
 -   🌐   Globe with meridians / world-network
 -  🪐    Ringed planet
 -  ⭐   🌟   ✨     Star, glowing star, sparkles
+
+---
+
+## Emojis for Tools
+
+### Hand tools
+
+🔧 Wrench  
+🔨 Hammer  
+🪛 Screwdriver  
+🪚 Saw  
+⛏️ Pickaxe  
+⚒️ Hammer and pick  
+🛠️ Hammer and wrench  
+🪓 Axe  
+🔩 Nut and bolt  
+⚙️ Gear  
+🧰 Toolbox  
+🪜 Ladder  
+📏 Ruler  
+✂️ Scissors  
+🗜️ Clamp  
+🧲 Magnet
+
+### Construction and repair
+
+🧱 Brick  
+🪵 Wood  
+🧵 Thread  
+🪡 Sewing needle  
+🧶 Yarn  
+🧯 Fire extinguisher  
+🧴 Glue or adhesive  
+🪣 Bucket  
+🧽 Sponge  
+🧹 Broom  
+🧼 Soap or cleaning tool  
+🪠 Plunger
+
+### Gardening tools
+
+🌱 Seedling  
+🌿 Herb or plant  
+🪴 Potted plant  
+🌳 Tree  
+🌾 Crop  
+🚜 Tractor  
+🪴 Planter  
+💧 Watering or irrigation  
+🧤 Gardening gloves
+
+### Digital and software tools
+
+💻 Computer  
+🖥️ Desktop computer  
+⌨️ Keyboard  
+🖱️ Mouse  
+📱 Mobile device  
+🖨️ Printer  
+💾 Save or storage  
+💿 Disk or media  
+🔌 Plug-in or connection  
+🔋 Battery  
+🧩 Plugin, extension, or component  
+⚙️ Settings or configuration  
+🛠️ Developer tools  
+🧰 Toolkit  
+🧪 Testing or experimentation  
+🤖 Automation or AI tool  
+🔍 Search or inspection  
+🧭 Navigation or exploration  
+📦 Package or software module  
+🗃️ Archive or repository
+
+### Useful combinations
+
+- 🛠️ **Tools**
+- 🔧 **Settings or repair**
+- 🧰 **Toolkit**
+- ⚙️ **Configuration**
+- 🧩 **Plugin or extension**
+- 🧪 **Testing**
+- 💻 **Development**
+- 🤖 **AI tool**
+- 🔍 **Search tool**
+- 📦 **Software package**
+- 🗃️ **Archive**
+- 🛠️💻 **Developer tooling**
+- ⚙️🧩 **Configuration plugin**
+- 🤖🧰 **AI toolkit**
+
+For a general “tools” label, the clearest choices are **🛠️**, **🔧**, **🧰**, or **⚙️**.
