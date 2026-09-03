@@ -1,4 +1,4 @@
-# #1: Enable: Workflow Automation to record web-based GitHub issues into archive/issues
+# #1: Enable: Workflow Automation to record web-based GitHub issues into ./archive/issues
 
 **State:** OPEN
 **Author:** vyzed
