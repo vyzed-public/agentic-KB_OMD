@@ -1,21 +1,22 @@
-Perform a full ingest of the file named in $ARGUMENTS from `2_using_timeline/`, with the curator interview always included (never skipped).
+Perform a full ingest of the file named in `$ARGUMENTS` from `2_using_timeline/` —
+**with one override: the curator interview is mandatory and is never skipped.**
 
-Follow the standard ingest process defined in CLAUDE.md, with the interview step mandatory:
+**Follow the full procedure defined in [[spec.file-ingestion]]** — the 12 steps plus
+the Q1–Q5 interview — as the single source of truth. **Do not restate or re-number the
+steps or the interview questions here;** that duplication is what let this command drift
+out of sync with the spec. This command changes exactly one thing versus a normal ingest:
 
-1. Read `2_using_timeline/$ARGUMENTS`.
-2. Present 3–5 key takeaways; discuss briefly.
-3. Run the curator interview — all three questions in order, no skip offer:
-
-   **Q1: Purpose (immediate intention or future use)?**
-   After they answer, distill into a concise 1–2 sentence statement and offer it back for approval before recording it.
-   **Q2: Any category suggestions?**
-   **Q3: For any specific project(s)?**
-
-   Apply the Q2 conflation check as specified in CLAUDE.md: compare any suggested category against existing concept pages before accepting it; surface overlaps and let the human decide.
-
-4. Use interview answers to populate `purpose:` and `projects:` frontmatter and to guide cluster/category decisions throughout.
-5. Continue with standard ingest steps 4–9 from CLAUDE.md.
+- **The interview is not skippable.** Conduct **all** of the spec's interview questions
+  (Q1–Q5) in order, and **never present the "skip" option** the standard flow allows. The
+  question definitions, the Q2 conflation check, and the frontmatter stamping
+  (`purpose` / `projects` / `repeat` / `priority`) are exactly as the spec defines them —
+  follow the spec, don't paraphrase it.
 
 ---
 
-**Why the interview matters (the two-value thesis):** Q2 (categories + conflation check) and Q3 (projects) are how this source gets **placed into the wiki's relationship network** — *value source #1*, the expensive networking work the curator should never have to do at collection time. Do that placement well. But keep the resulting source summary **lossy**: summarize close-but-compressed and let cross-references carry the value — never copy the timeline artifact up into the summary. Detail stays one rung down the inference ladder (*value source #2*). See `1_agentic_config/admin/mission.rescue-the-curator.md` and the "Why This Works" section of `AGENTS.md`.
+**Why the interview matters (the two-value thesis):** Q2 (categories + the conflation
+check) and Q3 (projects) are how a source gets **placed into the wiki's relationship
+network** — *value source #1*, the expensive networking the curator shouldn't do at
+collection time. Keep the source summary **lossy**; let cross-references carry the value.
+Detail stays one rung down the inference ladder (*value source #2*). See
+`mission.rescue-the-curator.md` and the "Why This Works" section of `AGENTS.md`.
