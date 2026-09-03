@@ -8,14 +8,12 @@
 
 ### Our process:
 1. Use the web GUI to create new file: `.github/workflows/sync-issues.yml`
-2. ...that contains the following CI code for **Workflow Automation** CI code
-
-...which is YAML that **archives & updates the web-based UX for creating/editing issues**
-into a per-project dir structure: `./archive/issues` that is: 
-* easily downloadable (w/ a standard `git pull` ) onto local machines for additional processing
-* thus bypassing the "stovepiping" web-based GUI
-  * which _seems_ intended to "enhance" platform dependence
-    * (because the WebGUI-based GitHub wiki structures can in fact, be `git pull` ops.)
+2. ...containing YAML-based automation workflow that: 
+* **Archives & updates the web-based UX for creating/editing issues** into a per-project dir structure: `./archive/issues` that is: 
+  * easily downloadable (w/ a standard `git pull` ) onto local machines for additional processing
+  * thus bypassing the "stovepiping" web-based GUI
+    * which _seems_ intended to "enhance" platform dependence
+      * (because the WebGUI-based GitHub wiki structures can in fact, be `git pull` ops.)
 
 #### Details (for the forgetful):  
 
