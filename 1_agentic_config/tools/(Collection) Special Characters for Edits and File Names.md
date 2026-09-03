@@ -155,3 +155,14 @@ For a UI label or an Obsidian section, I’d use:
 - 🤖🧰 **AI toolkit**
 
 For a general “tools” label, the clearest choices are **🛠️**, **🔧**, **🧰**, or **⚙️**.
+
+Contest: (Fighting or Boxing)
+Some combinations:
+
+- **Boxing:** 🥊👊💥
+- **Fight:** 👊✊🤜🤛
+- **Martial arts:** 🥋🥊🦵
+- **Wrestling:** 🤼‍♂️💪
+- **Action scene:** 🥊💥⚡️🔥
+- **Victory:** 🥊🏆💪
+- **Argument or conflict:** 😤🤬💢👊
