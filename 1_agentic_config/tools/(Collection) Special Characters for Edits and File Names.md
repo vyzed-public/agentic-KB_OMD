@@ -166,3 +166,19 @@ Some combinations:
 - **Action scene:** 🥊💥⚡️🔥
 - **Victory:** 🥊🏆💪
 - **Argument or conflict:** 😤🤬💢👊
+
+---
+
+## Emojis for Learning
+
+🎓 📚 🧠 ✏️ 📝 📖 💡 🔍 🏫 👩‍🎓 👨‍🎓 🧑‍🎓
+
+Good combinations:
+
+- Learning: 📚🧠💡
+- Studying: 📖✏️📝
+- Graduation: 🎓🎉
+- Student: 🧑‍🎓📚
+- Academic achievement: 🎓🏆✨
+- Online learning: 💻📚
+- New skill: 🧠🔧✨
