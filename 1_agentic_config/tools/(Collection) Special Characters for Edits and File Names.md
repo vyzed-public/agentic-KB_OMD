@@ -156,7 +156,8 @@ For a UI label or an Obsidian section, I’d use:
 
 For a general “tools” label, the clearest choices are **🛠️**, **🔧**, **🧰**, or **⚙️**.
 
-Contest: (Fighting or Boxing)
+### Contest: (Fighting or Boxing)
+
 Some combinations:
 
 - **Boxing:** 🥊👊💥
@@ -166,6 +167,13 @@ Some combinations:
 - **Action scene:** 🥊💥⚡️🔥
 - **Victory:** 🥊🏆💪
 - **Argument or conflict:** 😤🤬💢👊
+
+Candidates/Volunteers: using common emojis for a raised hand:
+- ✋ **Raised hand** — stop, pause, attention, or high-five.
+- 🖐️ **Hand with fingers splayed** — an open raised hand or wave.
+- 🙋 **Person raising hand** — asking a question, volunteering, or saying “me!”
+- 🙌 **Raising hands** — celebration, excitement, or “hooray!”
+- 🤚 **Raised back of hand** — signaling “wait” or “I have a question.”
 
 ---
 
