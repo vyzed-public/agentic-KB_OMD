@@ -24,6 +24,25 @@
 .DS_Store
 Thumbs.db
 
+# --- Large binary media = ephemeral local cache; NEVER committed (schema Rule 15) ---
+# Video/audio is referenced by its CTN (canonical source URL + remote-archive URL +
+# transcript wikilink), not stored in git. Patterns are PATH-INDEPENDENT bare globs on
+# PURPOSE: ingest MOVES media into 2_using_timeline/YYYY/MM/assets/, so a path-anchored
+# rule would let the next `git add -A` re-sweep it — a bare glob keeps it ignored
+# wherever it sits (inbox OR dated assets/). Transcripts (.vtt/.srt), notes (.md), and
+# images are unaffected and commit normally. (git-LFS is NOT used: a file carries only
+# one git filter, so an LFS filter would override filter=git-crypt and store media
+# UNENCRYPTED — see spec.file-ingestion "Large Media = Ephemeral Local Cache".)
+*.webm
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.m4a
+*.mp3
+*.wav
+*.flac
+
 # --- Dev-only scratch (planning docs, spikes, design notes, handoffs); Obsidian-visible, never shipped ---
 # Present only in a persistent dev vault; created on demand (e.g. by the /handoff command). A fresh
 # clone won't have it. Holds _handoff.current-map.md + _handoff.* bridges alongside design/spike scratch.

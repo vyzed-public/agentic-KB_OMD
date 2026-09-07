@@ -90,6 +90,31 @@ Never use tags as a substitute for wikilinks.
 
 ---
 
+## Media-capture CTNs
+
+A CTN whose subject is **large binary media** (a captured video/audio — a course, a talk, a podcast) is a special case, because the media file itself is **never committed** (schema Rule 15; procedure in [[spec.file-ingestion]] "Large Media = Ephemeral Local Cache"). The local media file is a **disposable cache**; the CTN is the **durable manifest** that makes it reproducible. Every media CTN must therefore record, **per media item**, four pointers:
+
+- **Canonical source** — the origin URL with a re-fetchable ID (e.g. a YouTube ID usable with `yt-dlp`). The content backstop of last resort.
+- **Remote archive** — an off-repo backup URL/ID (e.g. a Google Drive file link, or other object storage). The byte-durability home.
+- **Transcript** — a `[[wikilink]]` to the committed `.vtt`/`.srt` in `2_using_timeline/YYYY/MM/assets/` (this is the ingestible signal and *is* versioned in git).
+- **Local cache** — the dated local path to the media, explicitly labelled *ephemeral / not versioned* so no reader mistakes it for a durable copy.
+
+A media CTN carrying a local path but **missing both** a canonical source and a remote archive is the one genuinely lossy state (a local-only blob with no fallback) — `lint` flags it (see [[spec.lint-health-check]]). Shape it as a per-item list in the CTN body, for example:
+
+```markdown
+## Media
+
+- **Video 1 — <title>**
+  - canonical-source: https://youtube.com/watch?v=<id>   (`yt-dlp <id>` to re-fetch)
+  - remote-archive: https://drive.google.com/file/d/<id>/view
+  - transcript: [[<title>.en.vtt]]
+  - local-cache: `2_using_timeline/YYYY/MM/assets/<title>.webm`  *(ephemeral — not in git)*
+```
+
+(Multi-word wikilinks to generated pages still take slug-pipe per Wikilink Conventions; timeline files — the transcript `.vtt`/`.srt` — keep their exact original names and need none.)
+
+---
+
 ## Source Page Format
 
 A source GWN's **frontmatter** is the §3 + §4 schema above (`type: source`, plus `ctn:`). Its **body** follows this structure:
