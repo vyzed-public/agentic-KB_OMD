@@ -2,13 +2,13 @@
 title: Content-Vault Encryption
 created: 2026-07-09
 updated: 2026-07-19
-status: PLANNED — the three-tier model is decided; the enabling tooling (enable-encryption.sh) is NOT yet shipped. Tier 1 can be enabled manually today (see "Enable Tier 1 manually" below).
+status: ACTIVE — three-tier model decided; enable-encryption.sh ships both Tier 1 (git-crypt) and Tier 2 (git-remote-gcrypt), fronted by the /encrypt-vault command. The manual steps below are retained as the reference the script implements.
 description: Optional at-rest encryption for a CONTENT vault's notes, so they are opaque in the vault's own GitHub origin. Three privacy tiers chosen per-vault at deploy time. The framework repo is NEVER encrypted.
 ---
 
 # Content-Vault Encryption
 
-> **⏳ PLANNED.** The privacy-tier *model* below is decided and stable — use it to choose a tier now. The one-command enablement (`enable-encryption.sh`) is not yet shipped; Tier 1 can be enabled manually (steps at the bottom). Full rationale, threat model, and the open Tier-2 decision live in the dev design doc `DESIGN.content-vault-encryption.md` (not shipped with clones).
+> **✅ SHIPPED.** The privacy-tier *model* below is decided and stable — use it to choose a tier. One-command enablement is live: **`1_agentic_config/scripts/enable-encryption.sh --tier {1|2}`**, fronted by the **`/encrypt-vault`** command (guides the human-only steps: typed confirmations, the modal-pinentry push, and key backup). Run it right after `setup.sh`, **before the first content commit**. The manual steps at the bottom remain as the reference the script implements. Full rationale, threat model, and the Tier-2 decision live in the dev design doc `DESIGN.content-vault-encryption.md` (not shipped with clones).
 
 ## ⚠ CRITICAL operating risk — concurrent edits can CORRUPT an encrypted vault
 
@@ -27,7 +27,9 @@ description: Optional at-rest encryption for a CONTENT vault's notes, so they ar
 
 Encryption applies to a **content vault** (`akb-omd_<TOPIC>`), so a user's potentially sensitive notes are opaque at rest in **their own** GitHub `origin`. The shared **framework repo (`agentic-KB_OMD`) is never encrypted** — it is public and non-sensitive, and encrypting it would break the public-framework model and every downstream `git pull upstream`.
 
-This is the same content/framework boundary the content-guard hook enforces, from the other side: the guard keeps content *out of the framework repo*; encryption keeps content *opaque in the vault's own repo*. The canonical "what is content" list — `1_agentic_config/scripts/content-paths` — is the single source of truth for **what gets encrypted**, so the two never drift.
+This is the same content/framework boundary the content-guard hook enforces, from the other side: the guard keeps content *out of the framework repo*; encryption keeps content *opaque in the vault's own repo*.
+
+**What Tier 1 encrypts:** the whole content plane — **`2_using_timeline/**`** and **`3_generates_wiki/**`** — which deliberately includes **`3_generates_wiki/wiki.index.md`** (the catalog; its page names are themselves revealing). ⚠ Note this is *broader* than the content-guard's `1_agentic_config/scripts/content-paths` list: that list serves a **different** job (what may not be committed *into the framework*) and does **not** name `wiki.index.md`. `enable-encryption.sh` therefore encrypts by the content-plane globs above, **not** by `content-paths` — deriving `.gitattributes` from `content-paths` literally would leave the catalog plaintext, the single easiest Tier-1 mistake. (Config-plane files such as `1_agentic_config/logs/` are **not** encrypted by Tier 1; Tier 2 encrypts everything wholesale regardless.)
 
 ## Why not just "make the repo private"?
 
@@ -80,9 +82,9 @@ _Validated by the Tier-2 spike (run-1, 2026-07-16)._
 - **Concurrent edits corrupt encrypted content** — the single most dangerous failure mode; see **⚠ CRITICAL operating risk** at the top. Treat the vault as single-writer: pull before editing, push right after.
 - **Open the vault in Obsidian only after the working tree is unlocked** (decrypted), or Obsidian sees ciphertext.
 
-## Enable Tier 1 manually (until `enable-encryption.sh` ships)
+## Enable Tier 1 manually — the reference `enable-encryption.sh --tier 1` implements
 
-> These are the interim manual steps; the future `enable-encryption.sh` will generate `.gitattributes` from `content-paths`, run `git-crypt init`, **re-encrypt any pre-existing content-path files**, and gitignore the key automatically.
+> **Automated:** `./1_agentic_config/scripts/enable-encryption.sh --tier 1` (or `/encrypt-vault`) does all of this — `git-crypt init`, writes `.gitattributes` for the content-plane globs (`2_using_timeline/**` + `3_generates_wiki/**`), **re-encrypts pre-existing content-path files** (`wiki.index.md`) via `git-crypt status -f`, commits, and confirms the catalog encrypted before you push. The steps below are that reference — run them by hand only to understand or debug. (The git-crypt key lives under `.git/` and is never tracked, so there is nothing to gitignore.)
 
 ```bash
 # per-machine, one-time: install the binary
@@ -119,7 +121,9 @@ git-crypt export-key /dev/stdout | base64 -w0; echo
 
 Verify end-to-end: a fresh clone *without* the key shows ciphertext under `2_using_timeline/` and `3_generates_wiki/` — **including `wiki.index.md`** (grep it for a known page name; it must not appear); after `git-crypt unlock <key>` it shows plaintext. **If `wiki.index.md` is still readable in a keyless clone, the `git-crypt status -f` re-encryption step was missed** — the single easiest Tier-1 mistake to make.
 
-## Enable Tier 2 manually (until `enable-encryption.sh` ships)
+## Enable Tier 2 manually — the reference `enable-encryption.sh --tier 2` implements
+
+> **Automated:** `./1_agentic_config/scripts/enable-encryption.sh --tier 2` (or `/encrypt-vault`) does STEP ZERO + Parts A–C (derives owner/repo + key, confirms the local vault and remote state, resets the remote behind a typed confirmation, points `origin` at the gcrypt remote), then hands you the modal-pinentry push and `--verify`. The steps below are that reference — run them by hand only to understand or debug.
 
 > Tier 2 wraps the **remote** in git-remote-gcrypt: the whole push becomes one opaque blob (contents **+ filenames + history**). No `.gitattributes`, no per-file handling — encryption is wholesale at push time. It **requires a GPG key** (Tier 2 has no keyless/symmetric mode — see "Key management (Tier 2)" above); generate + back it up per `encryption.checklist.GPG-gcrypt.key-backup.md`, or reuse an existing solo key.
 
@@ -161,6 +165,7 @@ git -C "$D/unlocked" checkout main                    # REQUIRED — fresh gcryp
 - **Modal pinentry** — copy the passphrase to your clipboard BEFORE running the push/clone (it grabs focus). An agent driving the command cannot see or fill the dialog; the human must.
 - **Fresh gcrypt clone = empty working tree** (`remote HEAD refers to nonexistent ref`) → always `git checkout main`.
 - **First gcrypt push is implicitly `--force`** → for a shared vault set `git config remote.origin.gcrypt-require-explicit-force-push true`.
+- **A failed / timed-out first push leaves a stale `remote.origin.gcrypt-id`** → the retry aborts with `Repository not found … but repository ID is set. Aborting.` Fix: `git config --unset remote.origin.gcrypt-id`, then push again. (Common when the pinentry modal times out on the first try — verified during the Tier-2 script test.)
 
 ## See also
 - `checklist.new-wiki-project.md` §0.5 — the deploy-time tier decision.
