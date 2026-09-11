@@ -82,6 +82,10 @@ A source GWN summarizes exactly one CTN, so it adds a single field and **never c
 Concept / entity / synthesis GWNs synthesize *from* multiple sources, so they add a list and **never carry the `ctn:` property**:
 - `sources: [source-slug-1, source-slug-2]` — slugs of the source GWNs this page draws on.
 
+### Field-name discipline
+
+Frontmatter field names (YAML keys) must **not contain parentheses, spaces, or other bracket punctuation** — no `(` `)` `[` `]` `{` `}` and no whitespace. Such keys are legal YAML but break queryability (Dataview/Bases can't reference `file.parent(s)`) and propagate silently once baked into a Web Clipper template. A field that may hold **one or many** is named as a **plural list** — `parents:`, not `parent(s):` — never with a `(s)` suffix. (Separators like `-` and `_` are fine: `some-field` and `some_field` both query cleanly.)
+
 ### Tag discipline
 
 Tags mark **status and workflow state only** — not topic or category membership. Examples: `stub`, `needs-review`, `outdated`, `contradicted`, `to-expand`. Topic relationships between concepts are expressed exclusively through `[[wikilinks]]` woven into prose. 

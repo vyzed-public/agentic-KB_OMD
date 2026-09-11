@@ -6,7 +6,6 @@ author:
 published:
 created: 2026-05-08
 description: llm-wiki. A pattern for building personal knowledge bases using LLMs.
-parent(s):
 related:
 ---
 ## LLM Wiki
