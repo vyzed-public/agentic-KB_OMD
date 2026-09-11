@@ -11,7 +11,7 @@
 💡   a brightidea?
 ↺    re-visit
 
-💡 for an idea / lightbulb
+💡 🔮 for ideas / lightbulbs
 🤔 for a puzzling question face
 
 ---
