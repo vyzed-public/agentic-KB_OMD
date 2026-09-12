@@ -8,8 +8,13 @@ _The command-line tools, plugin, and skills the wiki agent uses. **Most ship wit
 
 Tracked in the framework repo, so a fresh clone already has them:
 
-- **Repeat plugin** ([`prncc/obsidian-repeat-plugin`](https://github.com/prncc/obsidian-repeat-plugin), v2.0.0) — `.obsidian/plugins/repeat-plugin/`. Spaced review of *filed* sources via the `repeat:` frontmatter field. Confirm enabled: Settings → Community Plugins → **Repeat** toggled on. *(Optional feature — leave off if you don't want review scheduling; the `repeat:` field simply lies dormant.)*
+- **Dataview plugin** ([`blacksmithgu/obsidian-dataview`](https://github.com/blacksmithgu/obsidian-dataview), release `0.5.70` — the bundled `manifest.json` self-reports `0.5.68`, an upstream tag/manifest drift) — `.obsidian/plugins/dataview/`. The frontmatter **query engine**: it drives Repeat's due-note queries and the `priority:`-based sorting and status-tag queries the schema assumes. **Required whenever Repeat is enabled** — Repeat calls Dataview's API and is inert without it. Confirm enabled: Settings → Community Plugins → **Dataview** toggled on. (Default settings suffice for Repeat — "Enable JavaScript Queries" is *not* needed.)
+- **Repeat plugin** ([`prncc/obsidian-repeat-plugin`](https://github.com/prncc/obsidian-repeat-plugin), v2.0.0) — `.obsidian/plugins/repeat-plugin/`. Spaced review of *filed* sources via the `repeat:` frontmatter field. **Depends on the Dataview plugin above** — enable Dataview too, or Repeat shows *"Repeat Plugin requires DataView Plugin to work."* Confirm enabled: Settings → Community Plugins → **Repeat** toggled on. *(Review scheduling is the optional bit — leave Repeat off if you don't want it and the `repeat:` field lies dormant; but if Repeat is on, Dataview is mandatory.)*
 - **Claude skills** — `.claude/skills/`: `obsidian-cli/`, `obsidian-bases/`, `defuddle/` (each a `SKILL.md`; MIT © Steph Ango / kepano, from [`kepano/obsidian-skills`](https://github.com/kepano/obsidian-skills)). Claude reads them on demand — nothing to enable. Confirm: `ls .claude/skills/`.
+
+> **First open = Restricted Mode.** A genuinely fresh clone opens in **Restricted Mode**, which suppresses *all* community plugins until you trust them once for this vault — so shipping the plugins "enabled" in config is not the same as them running. On first open, Settings → **Community Plugins** → **Turn on community plugins** (Trust author & enable), then confirm both **Dataview** and **Repeat** are toggled on.
+>
+> **Smoke test (verify Repeat is *operating*, not merely present):** with a filed CTN that carries a `repeat:` field, run the command **"Repeat: Review due notes"** — it should surface that note. If it errors on Dataview, Dataview isn't enabled.
 
 If any are missing, the clone didn't come through cleanly — re-clone per [[checklist.new-wiki-project]] §0.
 

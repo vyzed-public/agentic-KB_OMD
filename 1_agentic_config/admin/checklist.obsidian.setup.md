@@ -18,9 +18,15 @@ Settings → **Files & Links**:
 
 ---
 
-## 2. Community Plugin — Repeat (+ vendored skills)
+## 2. Community Plugins — Dataview + Repeat (+ vendored skills)
 
-The framework ships the **Repeat** plugin (`.obsidian/plugins/repeat-plugin/`) for spaced review of filed sources, plus the vendored Claude skills in `.claude/skills/`. Just **confirm** the plugin is enabled (Settings → Community Plugins → **Repeat**). Attachments are localized directly by the agent (no plugin), and authoritative graph queries come from the per-machine `obsidian` CLI. Full detail — including the two per-machine CLI installs (`obsidian`, `defuddle`) — is in [[setup.obsidian-tooling]]. *(The old Local REST API / MCP path has been retired — see [[HISTORY.explored-and-retired]].)*
+The framework ships two community plugins — **Dataview** (`.obsidian/plugins/dataview/`, the frontmatter query engine) and **Repeat** (`.obsidian/plugins/repeat-plugin/`, spaced review of filed sources) — plus the vendored Claude skills in `.claude/skills/`. **Repeat depends on Dataview** (it's inert without it, showing *"Repeat Plugin requires DataView Plugin to work."*), so enable **both**.
+
+- **First open = Restricted Mode:** a fresh clone suppresses all community plugins until you trust them once. Settings → **Community Plugins** → **Turn on community plugins** (Trust author & enable).
+- **Confirm both are toggled on:** Settings → Community Plugins → **Dataview** *and* **Repeat**.
+- **Smoke test (Repeat *operating*, not just present):** with a filed CTN carrying a `repeat:` field, run **"Repeat: Review due notes"** — it should surface that note with no Dataview error.
+
+Attachments are localized directly by the agent (no plugin), and authoritative graph queries come from the per-machine `obsidian` CLI. Full detail — including the two per-machine CLI installs (`obsidian`, `defuddle`) — is in [[setup.obsidian-tooling]]. *(The old Local REST API / MCP path has been retired — see [[HISTORY.explored-and-retired]].)*
 
 ---
 

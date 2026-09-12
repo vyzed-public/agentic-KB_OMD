@@ -175,7 +175,7 @@ Implement this setup exactly as described.
 
 ## 2. Open the Vault in Obsidian
 
-The clone already contains *everything* — the framework files, the `.obsidian/` app settings, the **Repeat** plugin, and the vendored Claude skills. There is **nothing to copy or assemble.** You just point Obsidian at the folder:
+The clone already contains *everything* — the framework files, the `.obsidian/` app settings, the **Dataview + Repeat** plugins, and the vendored Claude skills. There is **nothing to copy or assemble.** You just point Obsidian at the folder:
 
 - Obsidian → the **vault switcher** (bottom-left, the current vault's name) → **Manage vaults…** → **Open folder as vault** → pick your cloned `akb-omd_<TOPIC>` directory. *(On a fresh Obsidian launch, the "Manage vaults" window offers **Open folder as vault** directly.)*
 
@@ -194,7 +194,7 @@ Full detail: [[setup.obsidian-tooling]]. The short version:
 ```bash
 ls .claude/skills/          # expect: obsidian-cli/  obsidian-bases/  defuddle/
 ```
-And in Obsidian → Settings → Community Plugins → confirm **Repeat** is listed and toggled on. *(Optional — it powers spaced review of filed sources via `repeat:`. Leave off if you don't want it.)* If the skills folder or plugin is missing, the clone didn't come through cleanly — re-clone per §0.
+And in Obsidian → Settings → Community Plugins, confirm **both Dataview and Repeat** are listed and toggled on. **A fresh clone opens in Restricted Mode** — first click **Turn on community plugins** (Trust author & enable) or the plugins stay suppressed. **Repeat depends on Dataview** (inert without it: *"Repeat Plugin requires DataView Plugin to work."*), so enable Dataview even if you only want Repeat. *(Repeat's review scheduling is optional — leave it off if unwanted and the `repeat:` field lies dormant; but if Repeat is on, Dataview is mandatory.)* Smoke test: with a filed CTN carrying `repeat:`, run **"Repeat: Review due notes"** — it should surface that note with no Dataview error. If the skills folder or either plugin is missing, the clone didn't come through cleanly — re-clone per §0.
 
 **b. Enable the Obsidian CLI (one-time, per machine).** Used for authoritative graph queries during `lint` (`unresolved`/`orphans`/`backlinks`). It's **built into the desktop app** (Obsidian **1.12.7+**) — *not* an `npm`/package install: enable it via **Settings → General → Command line interface** and follow the registration prompt (on Linux the binary lands in `~/.local/bin` — ensure it's on your `PATH` — then restart your terminal). Full steps + gotchas: [[setup.obsidian-tooling]]. With Obsidian **running**, verify:
 
