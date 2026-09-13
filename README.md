@@ -5,7 +5,9 @@ A  [Karpathy-inspired](1_agentic_config/specs/pattern.karpathy-llm-wiki.md) know
 
 The problem with every previous generation of knowledge management tools is that they made the same fatal demand: **a human curator must wire the network at collection time.**  That demand imposes **exponentially increasing friction as the number of notes grows.** 
 
-The combinatoric explosion of possible connections simply outruns any human's capacity to keep up.  This is... stressful.
+The combinatoric explosion of possible connections simply outruns any human's capacity to keep up.  
+
+This is... stressful.  It's also ineffective.  Trying to organizing as you collect means you’re organizing before you understand. And organizing before you understand just means that you're spending a lot of energy making guesses at useful categories and connections.  Later on down the line, when you try to recall -- months after the fact -- exactly how you categorized some item of information (so you can search on that particular key) is an exercise in pure frustration.
 
 Agentic AI lets us separate knowledge *collection* from knowledge graph *networking*.  This is... a useful relief.
 ## Start here
