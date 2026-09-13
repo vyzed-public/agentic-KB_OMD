@@ -84,7 +84,9 @@ Concept / entity / synthesis GWNs synthesize *from* multiple sources, so they ad
 
 ### Field-name discipline
 
-Frontmatter field names (YAML keys) must **not contain parentheses, spaces, or other bracket punctuation** — no `(` `)` `[` `]` `{` `}` and no whitespace. Such keys are legal YAML but break queryability (Dataview/Bases can't reference `file.parent(s)`) and propagate silently once baked into a Web Clipper template. A field that may hold **one or many** is named as a **plural list** — `parents:`, not `parent(s):` — never with a `(s)` suffix. (Separators like `-` and `_` are fine: `some-field` and `some_field` both query cleanly.)
+Frontmatter field names (YAML keys) must **not contain parentheses, spaces, or other bracket punctuation** — no `(` `)` `[` `]` `{` `}` and no whitespace. Such keys are legal YAML but break queryability (Dataview/Bases can't reference `file.parent(s)`) and propagate silently once baked into a Web Clipper template. A field that may hold **one or many** is a **list-typed field named without a `(s)` suffix** — `parent:` (a list), never `parent(s):`. (Separators like `-` and `_` are fine: `some-field` and `some_field` both query cleanly.)
+
+**`parent` is the canonical grouping / MOC field:** a YAML **list** of `[[MOC]]` wikilinks on a note, queried by Dataview (`contains(parent, this.file.link)`) to drive dynamic Map-of-Content listings that keep working after the note is moved into its dated timeline folder at ingest.
 
 ### Tag discipline
 
