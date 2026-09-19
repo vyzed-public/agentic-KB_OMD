@@ -177,7 +177,7 @@ Candidates/Volunteers: using common emojis for a raised hand:
 
 ---
 
-## Emojis for Learning
+## Learning
 
 🎓 📚 🧠 ✏️ 📝 📖 💡 🔍 🏫 👩‍🎓 👨‍🎓 🧑‍🎓
 
@@ -190,3 +190,26 @@ Good combinations:
 - Academic achievement: 🎓🏆✨
 - Online learning: 💻📚
 - New skill: 🧠🔧✨
+
+---
+
+## Voice, including STT (speech-to-text) & TTS (text-to-speech) 
+
+Other useful options, depending on meaning:
+
+|Emoji|Best for|
+|---|---|
+|🎙️|Voice dictation, speech-to-text, recorded speech|
+|🎤|Microphone, singing, speaking, general audio input|
+|🎧|Listening, transcription review, audio workflow|
+|🗣️|Speaking / spoken language|
+|💬|Text generated from speech, conversation|
+|🔊|Audio playback rather than recording|
+|📢|Announcement or broadcast rather than dictation|
+
+For a UI label or Obsidian note heading, I’d use:
+
+- `🎙️ Speech to Text`
+- `🎙️ Dictation`
+- `🎤 Voice Input`
+- `🗣️ Transcription`
